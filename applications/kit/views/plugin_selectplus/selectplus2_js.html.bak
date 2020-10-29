@@ -1,0 +1,58 @@
+<script type="text/javascript"><!--
+        $(function(){
+{{include 'plugin_selectplus/dialog.html'}}
+/******** 
+    getCursorPos: Me devuelve la posición de inicio y fin de la selección o la posición del | en el campo 
+********/ 
+function getLastWord(str){
+    var l= str.lastIndexOf(" ") 
+}
+(function($, undefined) {  
+    $.fn.getCursorPosition = function() {  
+        var el = $(this).get(0);  
+        var pos = 0;  
+        if ('selectionStart' in el) {  
+            pos = el.selectionStart;  
+        } else if ('selection' in document) {  
+            el.focus();  
+            var Sel = document.selection.createRange();  
+            var SelLength = document.selection.createRange().text.length;  
+            Sel.moveStart('character', -el.value.length);  
+            pos = Sel.text.length - SelLength;  
+        }  
+        return pos;  
+    }  
+})(jQuery); 
+$( "[autoid={{=key}}]").keydown(function( event ) {
+ var e=event.which?event.which:event.keyCode;
+ function {{=u}}(){
+     var s=$('#{{=key}} :selected').text();
+     if (!s.indexOf('--') === 0) {
+         $([autoid={{=key}}]').val(s);
+         $('#{{=div_id}}').fadeOut();
+     } else if (!s.indexOf('>>') === 0) {
+
+     }
+       else {$('#{{=idcomp}}').dialog('open');
+             web2py_component('{{=urlcomp}}&def_field={{=field}}&def_name='+escape($('[autoid={{=key2}}]').val()),'{{=idcomp}}');
+            }
+ };
+ if (e==13){
+     {{=u}}();
+     event.preventDefault();
+     return false;
+    }
+	else if (e==40) {if($('#{{=key}} option:selected').next('option').length>0) $('#{{=key}} option:selected').removeAttr('selected').next().attr('selected','selected'); 
+                    else {$('#{{=key}} option:first').attr('selected','selected')}}
+	else if (e==38) {if($('#{{=key}} option:selected').prev('option').length>0) {$('#{{=key}} option:selected').removeAttr('selected').prev().attr('selected','selected')} else {$('#{{=key}} option:last').attr('selected','selected')};  }
+	else if ($('[autoid={{=key2}}]').val().length>={{=min_length}}) {
+            var buscar= $('[autoid={{=key2}}]').val();
+			$.get('{{=url}}?{{=key}}='+escape(buscar),function(data){
+					$('[autoid={{=key2}}]').next('.error').hide(); $('#{{=div_id}}').html(data).show().focus();$('#{{=div_id}} select').css('width',$('[autoid={{=key}}]').css('width'));$('#{{=key2}}').change({{=u}});$('#{{=key}}').click({{=u}});}
+			);
+            }
+	else $('#{{=div_id}}').fadeOut();
+});
+});
+//# sourceURL=selectplus2.js 
+--></script>

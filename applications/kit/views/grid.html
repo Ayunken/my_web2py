@@ -1,0 +1,10 @@
+{{extend 'layout.html'}}
+
+{{#=response.toolbar()}}
+
+{{if 'botones' in globals() or 'title' in globals():}}
+<table width='100%'><tr><td width='90%'>
+    <h1><span>{{=title if 'title' in globals() else ''}}</span></h1></td><td width='10%' align='right'>{{=botones if 'botones' in globals() else ''}}</td></tr></table>
+{{pass}}
+
+{{=grid}}

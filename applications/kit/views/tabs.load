@@ -1,0 +1,5 @@
+<table width="100%"><tr><td width="90%">
+<h3><span>{{='%s:' % title.capitalize()}}</span>
+<span id="{{='%s_name_%s' %(tablename,ficha.id)}}">{{=ficha.name}}</h3>
+</td><td width='10%' align='right'>{{=botones}}</td></tr></table>
+{{=tabs}}

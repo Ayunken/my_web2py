@@ -1,0 +1,31 @@
+{{#=response.toolbar()}} 
+
+{{if 'botones' in globals():}}
+<table width='100%'><tr><td width='90%'><h1><span></span></h1></td><td width='10%' align='right'>{{=botones}}</td></tr></table>
+{{pass}}
+{{=grid}}
+{{if formcopia:}}
+    <div class='row'>
+        <div class='col-lg-12 col-lg-offset-2'>
+            <hr>
+        </div>
+    </div>
+    <div class="container col-md-12">
+        {{=formcopia.custom.begin}}
+        <div class="form-group row" id="pr_row">
+            <label class="control-label col-sm-2">{{=formcopia.custom.label.copyatrmod}}</label>
+            <div class="col-sm-9">{{=formcopia.custom.widget["copyatrmod"]}}</div>
+            <div class="col-sm-1">{{=formcopia.custom.submit}} </div>
+        </div>
+        {{=formcopia.custom.end}}
+    </div>
+    {{#falta identificar bien esel input porque como ahora devuelve una lista y hay que ir por id }}   
+    <SCRIPT type='text/javascript'>$(document).ready(function(){
+            $('#no_table_copyatrmod').change(function(){
+        ajax("{{=URL(c='mod',f='grid_mod_mod_atr0.load',user_signature=True)}}",['copyatrmod'],'pregrid');}); });
+    </SCRIPT>
+      <div  class="container col-md-12"> 
+           <div class="col-sm-2"> </div>
+          <div id='pregrid' class="col-sm-9"></div>    
+      </div>
+{{pass}}

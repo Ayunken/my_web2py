@@ -1,0 +1,10 @@
+{{#=response.toolbar()}} 
+<style>
+.table {
+  font-size: 10px;
+}</style>
+{{if 'botones' in globals():}}
+<table width='100%'><tr><td width='90%'><h1><span></span></h1></td><td width='10%' align='right'>{{=botones}}</td></tr></table>
+{{pass}}
+
+{{=grid}}

@@ -1,0 +1,25 @@
+//# sourceURL=selectplus{{=key2}}.js 
+$( "#{{=idcomp}}").dialog({autoOpen: false, show: "fade", hide: "fade", width: {{=dialog_width}}});
+$( "#{{=idcomp}}").css('z-index', 1031)
+$( "#{{=my_select_id}}_option_add_trigger" ).click(function() { 
+ $( "#{{=idcomp}}").dialog({autoOpen: false, show: "fade", hide: "fade",title: "{{=T('New')}} {{=tablename}}", width: {{=dialog_width}}});
+ $( "#{{=my_select_id}}_dialog-form" ).dialog( "open" );web2py_component("{{=urlcomp}}","{{=idcomp}}"); return false;});
+{{if urledit:}}
+$( "#{{=my_select_id}}_option_edit_trigger" ).click(function() { 
+    $( "#{{=idcomp}}").dialog({autoOpen: false, show: "fade", hide: "fade",title: "{{=T('Edit')}} {{=tablename}}", width: {{=dialog_width}}});
+    $( "#{{=my_select_id}}_dialog-form" ).dialog( "open" );web2py_component("{{=urledit}}","{{=idcomp}}"); return false;});
+{{pass}}
+//decorate our activator button for good measure
+$(function() { 
+           //$("#{{=my_select_id}}_option_add_trigger" ).button({text: true, icons: { primary: "ui-icon-circle-plus"} });
+           //$("#{{=my_select_id}}_option_add_trigger" ).css("margin-left", "+=5");
+           //$("[autoid={{=key2}}]").css('width',$("#{{=my_select_id}}_adder_wrapper").width()-5-$("#{{=my_select_id}}_buttons").width());
+});
+// anular comportamiento normal de teclas de cursor
+$( "[autoid={{=key2}}]").keydown(function( event ) {
+var e=event.which?event.which:event.keyCode;
+     if ( (e==38 || e==40 || e==27 || e==13)){
+             event.preventDefault();
+             return false;
+     }
+});

@@ -1,0 +1,121 @@
+<script type="text/javascript"><!--
+        $(function(){
+{{include 'plugin_selectplus/dialog.html'}}
+/******** 
+    getCursorPos: Me devuelve la posición de inicio y fin de la selección o la posición del | en el campo 
+********/ 
+function setSelectionRange(input, selectionStart, selectionEnd) {
+  if (input.setSelectionRange) {
+    input.focus();
+    input.setSelectionRange(selectionStart, selectionEnd);
+  } else if (input.createTextRange) {
+    var range = input.createTextRange();
+    range.collapse(true);
+    range.moveEnd('character', selectionEnd);
+    range.moveStart('character', selectionStart);
+    range.select();
+  }
+}
+(function($, undefined) {  
+    $.fn.getCursorPosition = function() {  
+        var el = $(this).get(0);  
+        var pos = 0;  
+        if ('selectionStart' in el) {  
+            pos = el.selectionStart;  
+        } else if ('selection' in document) {  
+            el.focus();  
+            var Sel = document.selection.createRange();  
+            var SelLength = document.selection.createRange().text.length;  
+            Sel.moveStart('character', -el.value.length);  
+            pos = Sel.text.length - SelLength;  
+        }  
+        return pos;  
+    }  
+})(jQuery);
+
+
+$( "[autoid={{=key2}}]").keyup(function( event ) {
+ var e=event.which?event.which:event.keyCode;
+
+ function carga_lista(strbuscar, pg){
+     pg = (pg) ? pg : 1;
+     $.get('{{=url}}?{{=key}}='+escape(strbuscar)+'&pg='+pg,function(data){
+					$('[autoid={{=key2}}]').next('.error').hide(); $('#{{=div_id}}').html(data).show().focus();$('#{{=div_id}} select').css('width',$('[autoid={{=key2}}]').css('width'));$('#{{=key}}').change({{=u}});$('#{{=key}}').click({{=u}});}
+			)
+           $('#{{=div_id}}').css('z-index', 10)}
+
+ function {{=u}}(){
+     var s=$('#{{=key}} :selected').text();
+     if (s.indexOf('--') === 0) {
+            $('#{{=idcomp}}').dialog('open');
+             web2py_component('{{=urlcomp}}&def_field={{=field}}&def_name='+escape($('[autoid={{=key2}}]').val())+'&pg='+pg,'{{=idcomp}}');
+     } else   {
+         var str=$('[autoid={{=key2}}]').val();
+         var pg = $('#{{=key}} :selected').val();
+         var pos=$('[autoid={{=key2}}]').getCursorPosition();
+         var l=str.substring(0,pos).lastIndexOf('{{=sep[0]}}');
+         var campo='{{=sep[0]}}'+s+'{{=sep[1]}}';
+         s=str.substring(0,l)+campo+str.substring(pos);
+         if  (pg<0) {
+             carga_lista(str.substring(1),pg * -1);}
+         else {
+         pos=l+campo.length;
+         $('[autoid={{=key2}}]').val(s);
+         $('#{{=div_id}}').fadeOut();
+         setSelectionRange($('[autoid={{=key2}}]')[0],pos,pos);
+         }
+     }
+ };
+
+ if ($('#{{=div_id}} select').is(":visible")){ //si el desplegable está visible
+   if (e==13){
+     {{=u}}();
+     event.preventDefault();
+     return false;
+    }
+    else if (e==27)  $('#{{=div_id}}').fadeOut();
+	else if (e==40) {if ($('#{{=key}} option:selected').next('option').length>0){
+                         $('#{{=key}} option:selected').removeAttr('selected').next().attr('selected','selected');
+                         if  ($('#{{=key}} option:selected').val()<0 )
+                           {{=u}}();
+                     }  else {
+                         $('#{{=key}} option:first').attr('selected','selected')
+                     }
+                  return false;
+     }
+	else if (e==38  ) {
+       console.log($('#{{=key}} option:selected'));
+       if($('#{{=key}} option:selected').prev('option').length>0) {
+                            $('#{{=key}} option:selected').removeAttr('selected').prev().attr('selected','selected');
+                            if  ($('#{{=key}} option:selected').val()<0 )
+                            {{=u}}();
+                         } else {$('#{{=key}} option:last').attr('selected','selected')};
+                    return false}
+	else { 
+          var buscar= $('[autoid={{=key2}}]').val();
+          var pos=$('[autoid={{=key2}}]').getCursorPosition();
+           buscar=buscar.substring(0,pos+1);
+           var pos0=buscar.lastIndexOf('{{=sep[0]}}');
+           buscar=buscar.substring(pos0+1)
+           carga_lista(buscar,1);
+          }
+  }else {//si el desplegable no está visible
+     if (e==40 ) { //flecha abajo lo desplega 
+         var buscar= $('[autoid={{=key2}}]').val();
+         var pos=$('[autoid={{=key2}}]').getCursorPosition();
+         if (buscar.charAt(pos-1)!='{{=sep[0]}}'){
+                buscar=buscar.substring(0,pos)+'{{=sep[0]}}'+buscar.substring(pos);
+                pos+=1;
+                $('[autoid={{=key2}}]').val(buscar);
+                setSelectionRange($('[autoid={{=key2}}]')[0],pos,pos);}
+           buscar=buscar.substring(0,pos+1);
+           var pos0=buscar.lastIndexOf('{{=sep[0]}}');
+           buscar=buscar.substring(pos0+1);
+           carga_lista(buscar,1);
+           event.preventDefault();
+           return false;
+    }
+ }                    
+});
+});
+--></script>

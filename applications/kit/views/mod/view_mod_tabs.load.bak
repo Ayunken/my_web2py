@@ -1,0 +1,5 @@
+<table width='100%'><tr><td width='90%'><h2><span>{{=T("Módulo")}}: {{=ficha.name}}</span></h2></td><td width='10%' align='right'>{{=botones}}</td></tr></table>
+<DIV id="{{tab_form_id}}">
+{{=form}}
+</DIV>
+{{=tabs}}

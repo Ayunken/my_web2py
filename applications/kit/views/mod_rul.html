@@ -1,0 +1,6 @@
+{{#=response.toolbar()}} 
+{{if 'botones' in globals():}}
+<table width='100%'><tr><td width='90%'><h1><span></span></h1></td><td width='10%' align='right'>{{=botones}}</td></tr></table>
+{{pass}}
+{{=grid}
+{{=LOAD(URL(c='mod',f='grid_mod',vars=dict(rul_id=reg.id)),user_signature=True}}

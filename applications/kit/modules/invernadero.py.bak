@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from basic_custom import ATRS
+from custom import MOD_ATR_TIPO
+class Invernadero(object):
+    def __init__(self,db,presupuestoId ):
+        self.presupuestoId= presupuestoId
+        self._db=db
+        self.pre = self._db(db.mod_pre.id == self.presupuestoId)
+        self.atributos=self._carga_atributos()
+        self.matriz=None
+    def __call__(self):
+        return self._calculamatriz()
+    def _carga_atributos(self):
+        rows = self._db(self._db.mod_pre_atr.pre == self.presupuestoId).select()
+        atr={}
+        for r in rows:
+            if r.atr.tipo==MOD_ATR_TIPO.valores:
+                v=self._db.mod_val(r.valor)
+                if v:
+                    atr[r.atr] = v.valor
+            else:
+                atr[r.atr] = r.valor
+        return atr
+    def _calculamatriz(self):
+        rows = self._db(self._db.mod_pre_nav.pre == self.presupuestoId).select()
+        tuneles=[]
+        maxmodulos=0
+        for r in rows:
+            for t in range(0,r.unidades):
+                tuneles.append({'posy': r.posy, 'longitud': r.longitud, 'anchonave': r.anchonave})
+                if r.posy+r.longitud>maxmodulos:
+                    maxmodulos=r.posy+r.longitud
+        separacion=float(self.atributos[ATRS.separacion_vanos])
+        if not separacion:
+            return
+        maxmodulos=maxmodulos/separacion
+        maxmodulos=int(maxmodulos)
+        matriz = []
+        for t in tuneles:
+            tunel=[]
+            for m in range(0,maxmodulos):
+                nodo={}
+                pos=m*separacion
+                if pos>=t['posy'] and pos<=t['posy']+t['longitud']:
+                    nodo['ocupado']=True
+                else:
+                    nodo['ocupado'] = False
+                tunel.append(nodo)
+
+            matriz.append(tunel)
+        return matriz
+    def __str__(self):
+        if not self.matriz:
+            self.matriz=self._calculamatriz()
+        cad=''
+        for t in self.matriz:
+            for m in t:
+                cad+='1' if m['ocupado'] else '0'
+            cad+="\n"
+        return cad

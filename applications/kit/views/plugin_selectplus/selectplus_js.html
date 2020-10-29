@@ -1,0 +1,64 @@
+<script type="text/javascript"><!--
+    $(function(){
+{{include 'plugin_selectplus/dialog.html'}}
+
+/********
+    Selectplus
+********/
+function escape2(str){
+    return escape(str).replaceAll('+','%2B');
+}
+$( "[autoid={{=key2}}]").keyup(function( event ) {
+ $('#{{=key3}}').val('');
+ var e=event.which?event.which:event.keyCode;
+
+     function {{=u}}(){
+        if ($('#{{=key}}').val()>0)
+            {$('[autoid={{=key2}}]').val($('#{{=key}} :selected').text());$('#{{=key3}}').val($('#{{=key}}').val());
+            $('#{{=div_id}}').fadeOut();} 
+        else if ($('#{{=key}}').val()<0){
+            var pg=$('#{{=key}}').val()*-1;
+            carga_lista(pg);
+
+        }
+        else {$('#{{=idcomp}}').dialog('open');
+              web2py_component('{{=urlcomp}}&def_field={{=field}}&def_name='+escape2($('[autoid={{=key2}}]').val()),'{{=idcomp}}');
+            }
+     };
+
+    function carga_lista(pg ){
+         pg = (pg) ? pg : 1;
+         if ($('[autoid={{=key2}}]').val().length>={{=min_length}}) {
+             $.get('{{=url}}?{{=key}}='+escape2($('[autoid={{=key2}}]').val().trim())+'&pg='+pg,function(data){
+                 if(data=='') $('#{{=key3}}').val('');
+                 else{
+                     $('[autoid={{=key2}}]').next('.error').hide(); 
+                     $('#{{=div_id}}').html(data).show().focus();
+                     $('#{{=div_id}} select').css('width',$('[autoid={{=key2}}]').css('width'));
+                     $('#{{=key3}}').val($('#{{=key}}').val());
+                     $('#{{=key}}').change({{=u}});
+                     $('#{{=key}}').click({{=u}});}
+                 ;});
+                 $('#{{=div_id}}').css('z-index', 10)
+             }
+        else $('#{{=div_id}}').fadeOut();
+     };
+
+      if ($('#{{=div_id}} select').is(":visible")){ //si el desplegable está visible
+       if (e==13){
+         {{=u}}();
+         event.preventDefault();
+         return false;
+        }
+        else if (e==27)  $('#{{=div_id}}').fadeOut();
+        else if (e==40) {if($('#{{=key}} option:selected').next('option').length>0) $('#{{=key}} option:selected').removeAttr('selected').next().attr('selected','selected'); 
+                       else {$('#{{=key}} option:first').attr('selected','selected')}
+                      return false;
+         }
+            else if (e==38  ) {if($('#{{=key}} option:selected').prev('option').length>0) {$('#{{=key}} option:selected').removeAttr('selected').prev().attr('selected','selected')} else {$('#{{=key}} option:last').attr('selected','selected')};
+                        return false}
+        else carga_lista();
+        } else carga_lista();                
+    });
+});
+--></script>

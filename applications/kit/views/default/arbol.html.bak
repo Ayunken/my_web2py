@@ -1,0 +1,4 @@
+{{extend 'layout.html'}}
+
+<h2>{{=T('Tipos de Módulo')}}</h2>
+{{=arbol}}

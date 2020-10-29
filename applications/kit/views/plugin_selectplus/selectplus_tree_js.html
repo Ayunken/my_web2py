@@ -1,0 +1,75 @@
+<script type="text/javascript"><!--
+//# sourceURL=selectplus{{=key2}}.js
+$('#{{=div_id}}').hide();
+
+function show_node() {
+    var tree_el=$("#{{=div_id}} :jstree");
+    //var resp = tree_el.jstree('select_node', 'node_' + $("#{{=key3}}").val());
+    //if (!resp) {
+        //abrir padres para que se vea
+        var lista={{=script_show_parents}};
+        var indice=0;
+        if  (tree_el.jstree("is_loading","#"))
+                setTimeout("show_node()",100);
+        else
+            callback_shownode(tree_el,indice,lista);
+    //}
+}
+function callback_shownode(tree_el, indice, lista){
+    indice=indice + 1;
+    if (indice < lista.length) {
+        //setTimeout("$('#{{=div_id}} :jstree').jstree('open_node','node_"+lista[indice]+"',callback_shownode($('#{{=div_id}} :jstree')," + indice +",{{=script_show_parents}}),false)",1000);
+        if (!tree_el.jstree('open_node', 'node_' + lista[indice],function(){
+            callback_shownode(tree_el,indice,lista);
+        },false))
+            callback_shownode(tree_el,indice,lista);
+        }
+    else {
+        if  ("{{=fileid}}")
+            tree_el.jstree('select_node', 'item_{{=fileid}}',true,false);
+        else
+            tree_el.jstree('select_node', 'node_' + lista[indice-1],true,false);
+    }
+}
+var visto=0;
+function div_Show(id, mode) {
+if (mode) {
+    $('#' + id).css('z-index', 10);
+    $("#{{=my_select_id}}_option_sel_trigger span.glyphicon").removeClass("glyphicon-triangle-bottom");
+    $("#{{=my_select_id}}_option_sel_trigger span.glyphicon").addClass("glyphicon-triangle-top");
+    if (visto==1)
+            $('#' + id).show(0).focus();
+    else {
+        $('#' + id).show(0, show_node()).focus();
+        visto =1;}
+
+}
+else{
+    $("#{{=my_select_id}}_option_sel_trigger span.glyphicon").removeClass("glyphicon-triangle-top");
+    $("#{{=my_select_id}}_option_sel_trigger span.glyphicon").addClass("glyphicon-triangle-bottom");
+    $('#'+id).hide();}
+}
+$(function() {
+    $("[autoid={{=key2}}]").css('width', $("#{{=my_select_id}}_sel_warpper").width() -10- $("#{{=my_select_id}}_buttons").width());
+    $('#{{=div_id}}').css('width', $('[autoid={{=key2}}]').css('width'));
+
+});
+
+$( "#{{=my_select_id}}_option_sel_trigger" ).click(function() {
+   if ($('#{{=div_id}}').is(":visible") ) {
+       div_Show("{{=div_id}}", false);
+   }
+   else{
+      div_Show("{{=div_id}}",true);
+    }
+});
+
+
+$( "[autoid={{=key2}}]").keyup(function( event ) {
+    $('#{{=key3}}').val('');
+    var e = event.which ? event.which : event.keyCode;
+    if ($('[autoid={{=key2}}]').val().length >= 1) {
+        $("#{{=div_id}} :jstree").jstree(true).search($('[autoid={{=key2}}]').val());
+    }
+});
+--></script>

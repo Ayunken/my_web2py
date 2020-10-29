@@ -1,0 +1,426 @@
+{{from gluon.contrib import simplejson as json}}
+<div class="plugin_jstree">
+{{if search:}}
+    <input type="text" id="{{=element_id}}_q" value="{{=T('Buscar')}}" class="input" >
+{{pass}}
+<div id="{{=element_id}}" class="jstree" style="min-height:100px;background:white;">
+</div>
+{{=tree_crud_buttons}}
+<script type="text/javascript"><!--
+
+
+function jstree_refreshnodes(tree_el, indice, lista){
+    indice=indice + 1;
+    if (indice < lista.length) {
+        if (!tree_el.jstree('load_node', lista[indice],function(){
+            jstree_refreshnodes(tree_el,indice,lista);
+        },false))
+            jstree_refreshnodes(tree_el,indice,lista);
+        }
+    else {
+         tree_el.jstree('select_node',  lista[indice-1],true,false);
+    }
+}
+
+function F{{=keyword}}_refresh(node_parent,node_id){
+    var tree_el=$("#{{=element_id}}");
+    var nodo="node_"+node_id;
+    var lista=[];
+    var parent=nodo;
+    do{
+        lista.splice(0,0,parent);
+        parent=tree_el.jstree("get_parent",parent);
+    } while (parent);
+    lista.splice(0,0,"#");
+
+    jstree_refreshnodes($("#{{=element_id}}"),0,lista);
+
+    /*var parent=tree_el.jstree("get_parent",nodo);
+    tree_el.jstree("load_node",parent,function (e, data){
+        tree_el.jstree("select_node",nodo,"true");
+        });
+    */
+
+
+
+
+    };
+(function($) { $(function () {
+var tree_el = $("#{{=element_id}}");
+
+var tree_crud_buttons = $("#tree_crud_buttons");
+tree_crud_buttons.find('#add_node_button').click(function(){
+  tree_el.jstree("create", null, "last", "---"); return false;
+});
+tree_crud_buttons.find('#edit_node_button').click(function(){
+  var data = tree_crud_buttons.data('data'),
+      el = data.rslt.obj,
+      pos = el.position();
+  pos.top -= 45;
+  pos.left += 105;
+  tree_crud_buttons.css(pos);
+  tree_el.jstree("rename"); return false;
+});
+tree_crud_buttons.find('#delete_node_button').click(function(){
+    tree_el.jstree("remove");
+  return false;
+});
+
+function handle_error(r,data) {
+  if (r.status==406) {
+    jQuery('.flash').hide().html("{{=T('Sin cambios')}}").slideDown();
+  } else {
+    jQuery('.flash').hide().html("{{=T('No autorizado')}}").slideDown();
+  }
+  data.instance.refresh();
+}
+    var mode_select="{{=div_id}}";
+    var edit="{{=edit}}";
+    var plugins;
+    plugins=["themes", "json_data", "ui", "crrm", "hotkeys",  "types","wholerow","search","dnd"];
+    if  (!mode_select) plugins.push("state");
+    if (edit=="True") plugins.push("contextmenu");
+tree_el.jstree({ 
+    "plugins" : plugins,
+    "contextmenu":{         
+    "items": function($node) {
+        var tree = $("#{{=element_id}}").jstree(true);
+        return {
+            "Create": {
+                "separator_before": false,
+                "separator_after": false,
+                "label": "{{=T('Nuevo')}}",
+                "action": function (obj) { 
+                    $node = tree.create_node($node);
+                    tree.edit($node);
+                }
+            },
+            "Rename": {
+                "separator_before": false,
+                "separator_after": false,
+                "label": "{{=T('Modificar')}}",
+                "action": function (obj) { 
+                    tree.edit($node);
+                }
+            },                         
+            "Remove": {
+                "separator_before": false,
+                "separator_after": false,
+                "label": "{{=T('Eliminar')}}",
+                "_disabled" : function(obj){
+                 if (tree.is_parent($node))
+                     return true;
+                }, 
+                "action": function (obj) { 
+                    tree.delete_node($node);
+                    }
+              },
+            "Refresh":{
+                "separator_before": true,
+                "separator_after": false,
+                "label": "{{=T('Actualizar')}}",
+                "action": function (obj) { 
+                        tree.refresh();
+                    }
+              }
+            };
+        }
+    },
+    "core" : {
+      "data" : //{{=XML(json.dumps(data))}},
+            {"url" : "{{=url(args=[keyword,'getnode'],vars=filterdata)}}",
+			 "data" : function (node) {
+                          return { "id" : node.id };
+					  }
+            },
+      "force_text" : true,
+      "check_callback" : true,
+      "expand_selected_onload" : true,
+    },
+    "types" : {
+        "#" : {
+          "max_children" : 1,
+          "max_depth" : 4,
+          "valid_children" : ["root"]
+        },
+        "root" : {
+          "icon" : "glyphicon glyphicon-folder-open",
+          "valid_children" : ["default"]
+        },
+        "default" : {
+          "icon" : "glyphicon glyphicon-list",
+          "valid_children" : ["default","file"]
+        },
+        "ok" : {
+          "icon" : "glyphicon glyphicon-ok",
+          "valid_children" : ["default","file"]
+        },
+        "nok" : {
+          "icon" : "glyphicon glyphicon-ok-sign",
+          "valid_children" : ["default","file"]
+        },
+        "bad" : {
+          "icon" : "glyphicon glyphicon-remove",
+          "valid_children" : ["default","file"]
+        },
+        "file" : {
+          "icon" : "glyphicon glyphicon-file",
+          "valid_children" : []
+        }
+    },
+    "themes" : {
+      "theme" : "default",
+      "dots" : true,
+      "icons" : true
+    },
+  })
+  .on("create_node.jstree", function (e, data) {
+    //data.inst.lock();
+    jQuery('#tree_crud_buttons').jstree_spinner();
+    $.post("{{=url(args=[keyword,'new'])}}",
+      {
+        "target" : data.node.parent.split("_")[1],
+        "name" : data.node.text,
+        "node_type" : ""
+      },
+      function (r) {
+        data.instance.set_id(data.node, "node_" + r)
+      }
+    ).error(function(r){ 
+       handle_error(r, data);
+    });
+  })
+  .on("rename_node.jstree", function (e, data) {
+    $.post("{{=url(args=[keyword,'edit'])}}",
+      {
+        "id"   : data.node.id.split("_")[1],
+        "name" : data.text
+      },
+      function (r) {
+        jQuery('.flash').hide().html("{{=T('Cambiado')}}").slideDown();
+      }
+    ).error(function(r){ 
+      //handle_error(r, data);
+    });
+  }).on("delete_node.jstree", function (e, data) {
+   
+     if (data.instance.is_parent(data.node)) {
+      jQuery('.flash').hide().html("{{=T('No eliminable')}}").slideDown();
+      data.instance.refresh();
+      return;
+    }
+     if (!confirm("{{=T('¿Está seguro de eliminar el nodo?')}}")){
+           data.instance.refresh();
+           return;
+    }       
+    
+    $.post("{{=url(args=[keyword,'delete'])}}",
+      {
+        "id"   : data.node.id.split("_")[1],
+      },
+      function (r) {
+        jQuery('.flash').hide().html("{{=T('Borrado')}}").slideDown();
+      }
+    ).error(function(r){
+      handle_error(r, data);
+    });
+  }).on("move_node.jstree", function (e, data) {
+    if (edit=="True"){
+            if (data.node.parents.length === 1) {
+           alert("{{=T('Unmovable')}}");
+           data.instance.refresh();
+          return;
+        }
+        if (!confirm("{{=T('¿Desea mover el nodo?')}}")) {
+              data.instance.refresh();
+            return;
+        }
+        tree_el.jstree_spinner();
+        $.post("{{=url(args=[keyword,'move'])}}",
+          {
+            "id"   : data.node.id.split("_")[1],
+            "parent": data.parent.split("_")[1],
+            "position": data.position
+          },
+          function (r) {
+            tree_el.jstree_spinner('remove');
+            jQuery('.flash').hide().html("{{=T('Movido')}}").slideDown();
+            // TODO refresh?
+          }
+        ).error(function(r){
+          tree_el.jstree_spinner(keyword,'remove');
+          handle_error(r, data);
+        });
+    }
+   }).on("select_node.jstree", function (e, data) {
+    var idnode=data.node.id.split("_")[1];
+
+    if (mode_select){
+        var selectable="{{=can_select}}";
+        if ((selectable=='item' & data.node.id.startsWith('item')) | (selectable=='node' & data.node.id.startsWith('node'))){
+            $("[autoid={{=urlcomponent}}]").val(data.node.text);
+            var idcomp="{{=idcomponent}}";
+            if (idcomp){
+                $("#{{=idcomponent}}").val(idnode)}
+        } ;
+
+            //$("#" + mode_select).fadeOut();
+    } else {
+        var url="{{=urlcomponent}}";
+        if (url){
+         url=url.replace("node_id",idnode);
+         web2py_component(url,"{{=idcomponent}}")
+        }
+     }
+    }
+  ).bind("dblclick.jstree",function(e,data) {
+    var node = $(e.target).closest("li");
+    var idnode = node[0].id.split("_")[1];
+    if (mode_select) {
+        $("[autoid={{=urlcomponent}}]").val(node[0].textContent);
+        var idcomp = "{{=idcomponent}}";
+        if (idcomp) {
+            $("#{{=idcomponent}}").val(idnode)
+        }
+        $("#" + mode_select).fadeOut();
+    } else {
+        var url = "{{=urlcomponent}}";
+        if (url) {
+            url = url.replace("node_id", idnode);
+            web2py_component(url, "{{=idcomponent}}")
+        }
+    }
+   });
+ });
+
+
+{{if search and not div_id:}}
+//Control de la casilla de búsqueda
+ var to = false;
+ var search_el=$('#{{=element_id}}_q');
+ search_el.css("width",$('#{{=element_id}}').css("width"));
+ var search_lbl="{{=T('Buscar')}}"
+ function pinta_search(esto,modo){
+     if (modo) {
+         esto.value=search_lbl;
+         search_el.css("opacity",0.5);
+         search_el.css("font-style","italic");
+     } else
+         { esto.value='';
+           search_el.css("opacity",1);
+           search_el.css("font-style","normal");
+         }  
+ }
+ pinta_search(search_el,true);
+ search_el.focusout(function(){
+     if (this.value.length==0) pinta_search(this,true);
+ });
+ search_el.focus(function(){
+     if (this.value==search_lbl) pinta_search(this,false);
+ });
+ search_el.keyup(function () {
+	if(to) { clearTimeout(to); }
+    to = setTimeout(function () {
+          var v = search_el.val();
+           $('#{{=element_id}}').jstree(true).search(v);
+        }, 250);
+ });
+{{pass}}
+})(jQuery);
+
+					
+/*
+    Original by jquery.spinner.js
+    
+    Spinner provides a simple approach for adding and removing a preloader
+    for your web applications. Usage is as simple as calling $('elem').spinner() and
+    subsequently $('elem').spinner.remove(). You may create your own preloader
+    at http://www.ajaxload.info. Please note that if you use a custom preloader,
+    you must pass in the new height and width as options.
+    
+    Copyright (C) 2010 Corey Ballou
+    Website: http://www.jqueryin.com
+    Documentation: http://www.jqueryin.com/projects/spinner-jquery-preloader-plugin/
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+(function($) {
+    $.fn.jstree_spinner = function(options) {
+        var opts = $.extend({}, $.fn.jstree_spinner.defaults, options);
+
+        return this.each(function() {
+            var l=0, t=0, w=0, h=0, shim=0, $s;
+            var $this = $(this);
+            
+            // removal handling
+            if (options == 'remove' || options == 'close') {
+                var $s = $this.data('spinner');
+                var o = $this.data('opts');
+                if (typeof $s != 'undefined') {
+                    $s.remove();
+                    $this.removeData('spinner').removeData('opts');
+                    if (o.hide) $this.css('visibility', 'visible');
+                    o.onFinish.call(this);
+                    return;
+                }
+            }
+            
+            // retrieve element positioning
+            var pos = $this.offset();
+            w = $this.outerWidth();
+            h = $this.outerHeight();
+            
+            // calculate vertical centering
+            if (h > opts.height) shim = Math.round((h - opts.height)/ 2);
+            else if (h < opts.height) shim = 0 - Math.round((opts.height - h) / 2);
+            t = pos.top + shim + 'px';
+            
+            // calculate horizontal positioning
+            if (opts.position == 'right') {
+                l = pos.left + w + 10 + 'px';
+            } else if (opts.position == 'left') {
+                l = pos.left - opts.width - 10 + 'px';
+            } else {
+                l = pos.left + Math.round(.5 * w) - Math.round(.5 * opts.width) + 'px';
+            }
+            
+            // call start callback
+            opts.onStart.call(this);
+            
+            // hide element?
+            if (opts.hide) $this.css('visibility', 'hidden');
+            
+            // create the spinner and attach
+            $s = $('<div class="jstree_spinner" style="left: ' + l +'; top: ' + t + '; width: ' + opts.width + 'px; height: ' + opts.height + 'px; z-index: ' + opts.zIndex + ';"></div>').appendTo('body');
+            
+            // removal handling
+            $this.data('spinner', $s).data('opts', opts);
+        });
+    };
+    
+    // default spinner options
+    $.fn.jstree_spinner.defaults = {
+        position    : 'left'       // left, right, center
+        , height    : 16            // height of spinner img
+        , width     : 16            // width of spinner img
+        , zIndex    : 1001          // z-index of spinner
+        , hide      : false         // whether to hide the elem
+        , onStart   : function(){ } // start callback
+        , onFinish  : function(){ } // end callback
+    };
+})(jQuery);
+
+--></script>
+</div>

@@ -1,0 +1,3 @@
+#crontab
+0 5 * * * root *schedule/limpieza/Modulero
+@reboot root *schedule/inicio

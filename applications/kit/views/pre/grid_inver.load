@@ -1,0 +1,29 @@
+{{if len(inver.matriz)==0:}}
+<div class="alert alert-danger" role="alert">
+  Falta configurar túneles/naves en pestaña 'Naves'
+</div>
+{{else:}}
+{{#=TABLE([TR([TD('X' if t[m] else '0',_width='50',_style='border: 1px solid black') for t in inver.matriz],_style='height: 50') for m in reversed(range(0,len(matriz[0])))])}}
+    {{filas=[]}}
+    {{ratio=10}}
+    {{alto=float(inver.atr[ATRS.separacion_vanos].value)*ratio}}
+    {{for m in reversed(range(0,len(inver.matriz[0]))):}}
+        {{celdas=[]}}
+        {{for t in inver.matriz:}}
+            {{ancho=inver.tuneles[inver.matriz.index(t)]['anchonave']*ratio }}
+            {{if t[m]:}}
+                {{estilo='border: 1px solid black; background:green'}}
+            {{else:}}
+                {{estilo='border: 0px solid black'}}
+            {{pass}}
+            {{celdas.append(TD('',_width='%spx'%ancho,_style=estilo))}}
+        {{pass}}
+        {{filas.append(TR(*celdas,_style='height: %spx'%alto))}}
+    {{pass}}
+{{=TABLE(*filas)}}
+<div class='web2py_grid'>
+<div class="web2py_htmltable" style="width:100%;overflow-x:auto;-ms-overflow-x:scroll">
+{{=TABLE(THEAD(TR([TH(i) for i in ('id','name','clave','tipo','value')])),TBODY([[inver.atr[v].id,inver.atr[v].name,inver.atr[v].key,inver.atr[v].tipo,BEAUTIFY(inver.atr[v].value)] for v in inver.atr_sorted()]))}}
+</div>
+</div>
+{{pass}}

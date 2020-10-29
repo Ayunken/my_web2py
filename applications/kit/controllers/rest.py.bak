@@ -1,0 +1,622 @@
+# -*- coding: utf-8 -*-
+
+
+import datetime
+from custom import imprime_nota
+from formularios import *
+import os
+def reabrirpausadas(operario):
+    #buscaremos OT temporal que tenga en marcha, la cerraremos,
+    #continuar=0, no se reabre
+    #cerrar OT temporal. solo hay que pasarle el operario
+    #continuar=1, Volveremos a abrir la OT anterior que nos hemos dejado en pausa
+    #en close_ot normal deberíamos repartir las piezas entre los partes sin piezas de la misma ot y del mismo operario anteriores
+    #EL REPARTO DE PIEZAS SE HACE MEDIANTE UN TRIGGER EN INVER.DBO.LIN_ORDTRA
+    #TODAVIA NO ESTÁ ACTIVO. EL LUNES ACTIVAR EL TRIGGER QUE ESTÁ GUARDADO EN INVER3 O INVER4, Y VER SI NO LO HACEN CASCAR DESDE TALLER
+    row=db((db.ot_lin.operario==operario) & (db.ot.id==db.ot_lin.ot) &(db.ot.idestado==ESTADOS_ORDFAB.pausada)).select(db.ot_lin.ALL,orderby=(~db.ot_lin.inicio)).first()
+    if row:
+        ot=row.ot
+        resp= openot(ot,{'ot':ot,'actividad':row.actividad,'maquina':row.maquina,'operarios':operario})
+        if resp.get("errors"):
+                return resp
+    """ SOLO PERMITIMOS UNA OT AL MISMO TIEMPO, LUEGO SOLO VA A TENER ABIERTA UNA, SI PERMITIESES SOLAPADAS HABRIA QUE HACER EL SELECT DISTINCT=TRUE Y HACER ESTE BUCLE
+    if rows:
+        for row in rows:
+            ot=row.ot
+            resp= openot(ot,{'ot':ot,'actividad':row.actividad,'maquina':row.maquina,'operarios':operario})
+            if resp.get("errors"):
+                return resp
+    """
+    return {'errors':''}
+def closeot(ot,cantidad,modo,actividad=None,operario=None,observaciones=None,materias=None):
+    #ot: numero de ot a cerrar
+    #modo=2: reabrir misma ot en actividad=actividad
+    #modo=1: pausar
+    #modo=0: cerrar
+    resp={}
+    rows=(db.ot_lin.ot==ot)&(db.ot_lin.fin==None)
+    if operario:
+        rows=(rows & (operario==db.ot_lin.operario))
+    rows=db(rows).select()
+    if rows:
+        for row in rows:
+            row.fin=datetime.datetime.strftime(request.now,SQL_TIME_FORMAT)
+            row.canfab=cantidad
+            if observaciones and observaciones!='null':
+                row.observaciones=observaciones
+            row.update_record()
+            if materias:
+                 for item in materias:
+                            id=item.get("id")
+                            mp=db.materias_ordfab(id)
+                            if mp.materia!=item.get('idmateria'):
+                                db.materias_parte.insert(linordtra=row.id, pieza=mp.pieza,materia=mp.materia,materia_consumir=item.get('idmateria'))
+            #sql="Calcula_Horas_Solapadas  %s,'%s','%s',%s" %(row.operario,row.inicio.strftime(SQL_TIME_FORMAT),row.fin,row.canfab or 0)
+            #horas=db.executesql(sql)
+            #if horas:
+            #    horas=horas[0][0]
+            #row.tiempoefectivo=horas
+            #row.update_record()
+            sql="Calcula_Horas_Solapadas_Update  %s,'%s','%s'" %(row.operario,row.inicio.strftime(SQL_TIME_FORMAT),row.fin)
+            horas=db.executesql(sql)
+            if modo=='2':
+                db.ot_lin.insert(ot=row.ot,operario=row.operario,inicio=row.fin,maquina=row.maquina,actividad=actividad,noperarios=len(rows))
+                estado=ESTADOS_ORDFAB.abierta
+            elif modo=='1':
+                estado=ESTADOS_ORDFAB.parcial
+            elif modo=='3':
+                estado=ESTADOS_ORDFAB.pausada
+            else:
+                estado=ESTADOS_ORDFAB.cerrada
+        resp=db(db.ot0.id==ot).validate_and_update(estado=estado)
+        if not resp.errors:
+            resp['errors']=''
+    else:
+        resp['errors']="OT no está abierta"
+    return resp
+def openot(ot,campos):
+    resp={}
+    maquina=campos.get('maquina') or 0
+    operarios=campos.get('operarios','')
+    if operarios: operarios=operarios.split(',')
+    if campos.get("observaciones")=='null': del campos['observaciones']
+    actividad=campos.get('actividad')
+    if len(operarios)>0 and actividad:
+        #insertar ot_lin por cada operario
+        del campos['operarios'] # para que no moleste en la pasada del resto de argumentos
+        campos['noperarios']=len(operarios)
+        campos['inicio']=request.now
+        for op in operarios:
+            if op:
+                resp=db.ot_lin.validate_and_insert(operario=op,**campos)
+                if resp.errors:
+                    db.rollback()
+                    current.logger.debug("rollbak %s" % resp)
+                    return resp
+        #actualizar ot con estado, maquina y numero de opearios
+        db.ot0(ot).update_record(maquina=maquina,numoperarios=len(operarios),estado=ESTADOS_ORDFAB.abierta)
+        resp['resp']='ok'
+        resp['errors']=''
+    else:
+        resp['errors']="Faltan datos para completar la acción: o:%s m:%s a:%s " %(operarios,maquina,actividad)
+    return resp
+@request.restful()
+def api():
+    response.view='generic.'+request.extension
+    auth.settings.allow_basic_login = True
+    auth.basic()
+    def GET(funcion,**params):
+        if not auth.user: raise HTTP(403)
+        if funcion=='producto' or funcion=='productos_stock':
+            if funcion=='producto':
+                tabla=db.productos
+            else:
+                tabla=db.productos_stock
+            id=params.get("id")
+            if params.has_key('barcode'):
+                codigos=desmonta_barcode(params['barcode'])
+                id=codigos.get('id_pieza')
+            if params.has_key('codigo'):
+                row=db(tabla.codigo==params['codigo']).select()
+            else:
+                row=[tabla(id)]
+            if row and params.has_key('barcode'):
+                row[0]['cantidad']=codigos.get('cantidad')
+            if not row:
+                row=[{'errors':'Producto no encontrado'}]
+            return dict(resp=row)
+        elif funcion=='materias_ordfab':
+            ordfab=params.get("ordfab")
+            pieza=params.get("pieza") #id pieza se entiende
+            if ordfab and pieza:
+                row=db((db.materias_ordfab.ordfab==ordfab) & (db.materias_ordfab.pieza==pieza)).select()
+                return dict(resp=row)
+            else:
+                raise HTTP(400,'Parametros incompletos %s'% params )
+        elif funcion=='cargas':
+            row=db(db.cargas.estado==2601).select(orderby=(db.cargas.fecha,db.cargas.ordencarga))
+            #for r in row:
+            #    if r.fecha :
+            #         r.fecha=db.entregas.fecha.represent(r.fecha,r)
+            return dict(resp=row)
+        elif funcion=='form_pre':
+            #previo a envio de formulario, para que terminal pida las variables mediante GUI propia
+            tipo=params.get("tipo")
+            if tipo=='recepcion':
+                pedido=params.get("pedido")
+                lineas=params.get("lineas")
+                idformulario=1 #para recepcion
+                if pedido and lineas:
+                    current.logger.debug("form_pre: pedido:%s linesa:%s"%(pedido,lineas))
+                    resp=genera_variables_formulario(db,idformulario,pedido.split(','),lineas.split(','))
+                    return dict(resp=resp)
+                else:
+                    raise HTTP(400,'Parametros incompletos %s'% params )
+            else:
+                raise HTTP(400,'Tipo formulario no válido' )
+        elif funcion=='form':
+            tipo=params.get("tipo")
+            if tipo=='recepcion':
+                pedido=params.get("pedido")
+                albaran=params.get("albaran")
+                operario=params.get("operario")
+                lineas=params.get("lineas").split(',')
+                if operario and pedido and albaran:
+                    operario=db.operarios(operario).name
+                    return genera_formulario_recepcion(db,pedido,albaran,operario,lineas)
+                else:
+                    raise HTTP(400,'Parametros incompletos %s'% params )
+            elif tipo=='plano':
+                codigo=params.get('codigo')
+                if codigo:
+                    return descarga_plano(codigo)
+                else:
+                    raise HTTP(400,'Parametros incompletos %s'% params )
+            else:
+                raise HTTP(400,'Tipo formulario no válido' )
+        elif funcion=='entregas':
+            row=db(db.entregas.firmada==0).select(orderby=db.entregas.id)
+            #for r in row:
+            #    if r.fecha :
+            #         r.fecha=db.entregas.fecha.represent(r.fecha,r)
+            return dict(resp=row)
+        elif funcion=='pedpro':
+            id=params.get('id')
+            id=id.split(',')
+            selpte=(db.pedpro.idestado.belongs((800,801,802,803,804,805)))
+            if id:
+                row=db(selpte & (db.pedpro.pedido.belongs(id))).select(orderby=(db.pedpro.pedido,db.pedpro.codigo))
+            else:
+                row=db(selpte).select(db.pedpro.pedido,db.pedpro.fecha,db.pedpro.proveedor,db.pedpro.estado,orderby=db.pedpro.pedido, distinct=True)
+            #for r in row:
+            #    if r.fecha :
+            #         r.fecha=db.entregas.fecha.represent(r.fecha,r)
+            return dict(resp=row)
+        elif funcion=='ot_lin':
+            id=params.get('id')
+            ot=params.get('ot')
+            campos=[db.ot_lin.ALL,db.ot.ordfab,db.ot.codigopieza,db.ot.pieza,db.ot.codigotrabajo,db.ot.trabajo,db.maquinas.name,db.actividades.name,db.operarios.name]
+            left=[db.ot.on(db.ot.id==db.ot_lin.ot),db.maquinas.on(db.maquinas.id==db.ot_lin.maquina),db.actividades.on(db.actividades.id==db.ot_lin.actividad)]
+            left=left + [db.operarios.on(db.operarios.id==db.ot_lin.operario)]
+            if id:
+                row=db(db.ot_lin.id==id)
+            elif ot: #devuelve mov de ot abiertos
+                row=db((db.ot_lin.ot==ot) & (db.ot_lin.fin==None))
+            else:
+                row=db((db.ot_lin.fin==None))
+            row=row.select(*campos,left=left)
+            return dict(resp=row)
+        elif funcion=='operario':
+            id=params.get('id')
+            if id:
+                row=db.operarios(id)
+            else:
+                row=db(db.operarios.id>0).select(orderby=db.operarios.name)
+            return dict(resp=row)
+        elif funcion=='trabajosvarios':
+            ordfab=int(params.get("ordfab",CODIGOSTALLER.ordfabComodin))
+            if ordfab==CODIGOSTALLER.ordfabComodin:
+                row=db(db.trabajosvarios.id>0).select()
+            #elif ordfab==-1:
+            else:
+                row=db(db.productos.codigo.belongs('9000003','9060020','9060019')).select(db.productos.codigo.with_alias('id'), db.productos.name.with_alias('name') ,orderby=db.productos.codigo)
+            #else:
+            #    row=db((db.ot.ordfab==ordfab) &(db.ot.codigopieza==CODIGOSTALLER.piezaTrabajosComplementarios)).select(db.ot.codigotrabajo.with_alias('id'), db.ot.trabajo.with_alias('name') ,orderby=db.ot.codigotrabajo)
+            return dict(resp=row)
+        elif funcion=='actividad':
+            id=params.get('id')
+            if id:
+                row=db.actividades(id)
+            else:
+                row=db(db.actividades.id>0).select(orderby=db.actividades.id)
+            return dict(resp=row)
+        elif funcion=='maquina':
+            id=params.get('id')
+            if id:
+                if '%' in id or '':
+                    row=db(db.maquinas.id.like(id)).select(db.maquinas.id,db.maquinas.name,orderby=db.maquinas.id)
+                else:
+                    row=db.maquinas(id)
+            else:
+                row=db(db.maquinas.id>=0).select(db.maquinas.id,db.maquinas.name,orderby=db.maquinas.id)
+            return dict(resp=row)
+        elif funcion=='ordfab':
+            id=params.get('id')
+            if id:
+                row=db.ordfab(id)
+            else:
+                row=db(db.ordfab.idestado.belongs((103,102))).select(orderby=db.ordfab.id)
+            return dict(resp=row)
+        elif funcion=='ot_operario':
+            operario=params.get("operario")
+            if operario:
+                campos=(db.ot_lin.inicio,db.ot_lin.id,db.ot.ALL)
+                row=db((db.ot_lin.operario==operario) &(db.ot_lin.fin==None)).select(left=db.ot.on(db.ot.id==db.ot_lin.ot),*campos).first()
+                if row:
+                    if row.ot.codigopieza==CODIGOSTALLER.piezaComodin or row.ot.codigopieza==CODIGOSTALLER.piezaTrabajosComplementarios:
+                        row.ot.update({'tmp':row.ot.codigotrabajo})
+                        #if row.ot.codigotrabajo==CODIGOSTALLER.codigoCargas:
+                        #    row.ot.update({'tmp':'0'}) #marco la ot como temporal para que se identifique si van por cargas/descargas para cerrarla artomaticamente
+                        #if row.ot.codigotrabajo==CODIGOSTALLER.codigoDescargas:
+                        #    row.ot.update({'tmp':'1'}) #marco la ot como temporal para que se identifique si van por cargas/descargas para cerrarla artomaticamente
+                    return dict(resp=[row])
+                else:
+                    return dict(resp=[])
+            else:
+                raise HTTP(400,"%s, Operario no provisto" %funcion)
+        elif funcion=='ot':
+            id=params.get('id')
+            barcode=params.get('barcode')
+            ordfab=params.get('ordfab')
+            operario=params.get('operario')
+            orden=db.ot.inicio
+            if id:
+                row=db(db.ot.id==id)
+            elif barcode:
+                row=db(db.ot.barcode==barcode)
+            elif ordfab:
+                pieza=params.get('codigopieza')
+                trabajo=params.get('codigotrabajo')
+                row=db((db.ot.ordfab==ordfab)&(db.ot.codigopieza==pieza)&(db.ot.codigotrabajo==trabajo))
+            elif operario:
+                row=db((db.ot_lin_prg.operario==operario)&(db.ot_lin_prg.estado.belongs(1,0,2))&(db.ot_lin_prg.ot==db.ot.id))
+                orden=db.ot_lin_prg.inicio
+            else:
+                row=db(db.ot.idestado.belongs((ESTADOS_ORDFAB.abierta,ESTADOS_ORDFAB.pausada)))
+            row=row.select(db.ot.ALL,orderby=orden)
+            if id:
+                if operario: #si hay que filtrar por ot y operario, hay que buscar ot abierta por él 
+                    op=db((db.ot_lin.ot==id) &(db.ot_lin.fin==None)&(db.ot_lin.operario==operario)).select(db.ot_lin.inicio).first()
+                    if op: #op debe contener ahora la fecha inicio del parte del operario
+                        #ahora busco partes de otros operarios que han empezado a la vez la misma ot además del operario buscado
+                        #para que sql server no de error, le quito los microsegundos a la fecha, ya que python lo entrega con 6 digitos(microsegundos) y sqlserver solo quiere 3 digitos (milisegundos), segun formato sqlserver_datetime (datetime2 es de 6)
+                        inicio=op.inicio.isoformat()
+                        if len(inicio)==26:
+                            inicio=inicio[0:-3]
+                        op=db((db.ot_lin.ot==id) &(db.ot_lin.fin==None)&((db.ot_lin.operario==operario)|(db.ot_lin.inicio==inicio))).select(db.ot_lin.id,db.ot_lin.inicio,db.ot_lin.actividad, db.actividades.name, db.operarios.id, db.operarios.name, left=(db.operarios.on(db.operarios.id==db.ot_lin.operario), db.actividades.on(db.actividades.id==db.ot_lin.actividad)), orderby=db.ot_lin.inicio)
+                    if not op: #si no, voy a buscar programados
+                        op=db((db.ot_lin_prg.ot==id)&(db.ot_lin_prg.operario==operario)&(db.ot_lin_prg.estado<3)).select(db.ot_lin_prg.inicio).first()
+                        if op: #devuelvo entonces el operario programado y buscado y el de su mismo equipo
+                            if  op.inicio
+                            inicio=op.inicio.isoformat() if op.inicio else request.now.isoformat()
+                            if len(inicio)==26:
+                                inicio=inicio[0:-3]
+                            op=db((db.ot_lin_prg.ot==id) & (db.ot_lin_prg.inicio==inicio)&(db.ot_lin_prg.estado<3)).select(db.ot_lin_prg.operario, db.operarios.id, db.ot_lin_prg.idmaquina,db.ot_lin_prg.maquina,db.ot_lin_prg.estado,db.ot_lin_prg.inicio,db.operarios.name, left=db.operarios.on(db.operarios.id==db.ot_lin_prg.operario))
+                else:
+                    op=db((db.ot_lin.ot==id) &(db.ot_lin.fin==None)).select(db.ot_lin.id,db.ot_lin.inicio, db.ot_lin.actividad,db.actividades.name,db.operarios.id, db.operarios.name, left=(db.operarios.on(db.operarios.id==db.ot_lin.operario), db.actividades.on(db.actividades.id==db.ot_lin.actividad)))
+                    if not op:
+                        op=db((db.ot_lin_prg.ot==id)&(db.ot_lin_prg.estado<3)).select(db.ot_lin_prg.operario,db.operarios.id, db.ot_lin_prg.estado,db.ot_lin_prg.inicio,db.operarios.name,db.ot_lin_prg.idmaquina,db.ot_lin_prg.maquina, left=db.operarios.on(db.operarios.id==db.ot_lin_prg.operario))
+                if row and op: #SI ES TAREA PROGRAMADA, NO INICIADA, PONGO LA MAQUINA DEL PRIMER OPERARIO en la maquina de la cab OT
+                    r=row[0]   #ASI, LA TABLET YA MUESTRA LA MAQUINA PREVISTA PARA INICIAR LA TAREA, que la toma del reg OT.
+                    if op[0].get('ot_lin_prg'):
+                        if op[0].ot_lin_prg.get('idmaquina'):
+                            r.update({'idmaquina':op[0].ot_lin_prg.idmaquina})
+                            r.update({'maquina':op[0].ot_lin_prg.maquina})
+                row=row,op
+            return dict(resp=row)
+        elif (funcion=='mod' and 'id' in params ):
+            row=db((db.mod.id==params['id'])).select(db.mod.id, db.mod.name, db.mod.tipo)
+            if row:
+                return dict(resp=row.first())
+            else:
+                raise HTTP(400,"No existe mod %s" %i)
+        else:
+            raise HTTP(400,'Función %s no válida' % funcion)
+# POST: tabla=lecturas, campos: 'maquina','dispositivo' obligados. Resto se pasan al uddate de tabla lecturas
+#       tabla=dispostivio, campos: 'dispositivo','imeiPhone', 'action=lock' o 'action=unlock' para desbloquear
+    def POST(funcion,**campos):
+        if not auth.user: raise HTTP(403)
+        elif funcion=='msgreg':
+            idreg=campos.get('idreg')
+            user=campos.get("usuario")
+            if user and idreg:
+                db.gcm_ids.update_or_insert(db.gcm_ids.name==user,name=user,registration_id=idreg)
+                resp={}
+            else:
+                resp={'errors': 'Missing idreg or user'}
+            return dict(resp=[resp])
+        elif funcion=='msgsend' or funcion=='sendemail': #sendemail deprecated
+            para=campos.get("destino",'user1')
+            obs=campos.get("observaciones")
+            asunto=campos.get("asunto")
+            de=campos.get("de")
+            de=quita_acentos(de)
+            from gluon.contrib.webclient import WebClient
+            client = WebClient('https://android.googleapis.com/gcm/')
+            apikey='AAAAEW2fwxg:APA91bF7SDcd4EQdrEqFu9GBjjcWdBpLiDknXy-0Nf5HwJR-daq_pvsjRSw3XxaQOkLx6XTKEvHpaBy9jiyrjWclpx7aVVXO2XfiZKHdQUpTxqE6mzF1M26CyntV4UWVt0ORCMGq8rZc'
+            #ctekey='APA91bEDSWXQnZAYCQgArLx1MXCiVwH5rPtH61oP3P8FYZHXbTnX-xjMzJNh9I21GIWKPKbd2GVVDIhttps://webserver/admin/default/edit/Modulero/models/db.py?id=models__db__py#9vDdoVkqaiFhVxb0qSmG1O9F7ltvFfhqKj68ADZctr0aOjMFJnh2jOw680RDWH'
+            ctekey=db(db.gcm_ids.name==para).select().first()
+            if ctekey:
+                ctekey=ctekey.registration_id
+                data=dict(data=str(dict(asunto=asunto,de=de,observaciones=obs)),
+                      to=[ctekey])
+                headers=dict(authorization='key=%s'%apikey)
+                headers['content-type']='application/json'
+                client.post('send',data=data,headers=headers)
+                if not 'Error' in client.text:
+                    resp={}
+                    estado=0
+                else:
+                    resp={'errors':client.text}
+                    estado=1
+                db.gcm_msg.insert(de=de,asunto=asunto,observaciones=obs,para=para,estado=estado)
+            else:
+                resp={'errors': 'No idregistration para %s'%para}
+        elif funcion=='send-email':
+            para=campos.get("destino")
+            mensaje=campos.get("observaciones")
+            asunto=campos.get("asunto")
+            de=campos.get("de")
+            if mail:
+                mail.settings.tls = True
+                #mail.settings.ssl = True
+                de=quita_acentos(de)
+                import unicodedata
+                if mail.send(to=['stinverca@gmail.com'],subject=asunto, message=mensaje,sender='"%s"<user@inverca.es>'%de):
+                #if mail.send(to=['manolo@inverca.es'],subject=asunto, message=mensaje,sender='"%s"<user@inverca.es>'%de):
+                     resp="{}"
+                else:
+                     resp={'errors':' No se pudo enviar el mensaje'}
+            else:
+                resp={'errors':' Correo no configurado'}
+            return dict(resp=[resp])
+        elif funcion=='pdf_fields': #funcion nueva que recibe los campos de formulario para generar ahora el pdf y guardarlo en ubicacion final
+            id=campos.get('PEDIDO')
+            id=id.split(',')
+            tipo=campos['tipo']
+            resp={}
+            if tipo=='recepcion':
+                albaran=valid_filename(campos.get('ALBARAN'))
+                row=db(db.pedpro.pedido.belongs(id)).select(db.pedpro.pedido,db.pedpro.idproveedor,db.pedpro.proveedor,distinct=True).first()
+                if row:
+                    campos['PROVEEDOR']=row.proveedor
+                    serie='PP'
+                    #camino=os.path.join(myconf.get('paths.docsprov') ,'%06d'% row.idproveedor)
+                    #touch_dir(camino)
+                    alb=db(db.albpro.albaran==albaran).select(db.albpro.id).first()
+                    if alb:
+                        filename = '%s_I.pdf'%(alb.id)
+                        camino=os.path.join(myconf.get('paths.docs'),'AP')
+                        touch_dir(camino)
+                        filepath = os.path.join(camino,filename)
+                        current.logger.debug('post_form:%s'%campos)
+                        if 'S' in campos.get('BIEN'):
+                            #current.logger.debug('update BIEN')
+                            alb.update_record(hojainspeccion=1)
+                        elif 'S' in campos.get('MAL'):
+                            #current.logger.debug('update MAL')
+                            alb.update_record(hojainspeccion=2)
+                    else:
+                        filename = '%s_%s.pdf'%(row.idproveedor,albaran)
+                        camino=os.path.join(myconf.get('paths.docsprov'),'inspeccion_pte')
+                        touch_dir(camino)
+                        filepath = os.path.join(camino,filename)
+                        if os.path.exists(camino):
+                            filename = '%s_%s.1.pdf'%(row.idproveedor,albaran)
+                            filepath = os.path.join(camino,filename)
+                            if os.path.exists(camino):
+                                filename = '%s_%s.2.pdf'%(row.idproveedor,albaran)
+                                filepath = os.path.join(camino,filename)
+                    r=genera_formulario_recepcion(db,campos,filepath)
+                    #r=verifica_formulario_recepcion(filepath) #se supone que ya viene verificado
+                    if r:
+                        resp={'errors': r}
+            else:
+                raise HTTP(400,"Tipo %s no previsto" %tipo)
+            return dict(resp=[resp])
+        elif funcion=='pdf': #funcion vieja que recibe el pdf rellado
+            if not campos.has_key('tipo') : raise HTTP(400, campos)
+            id=campos.get('id')
+            tipo=campos['tipo']
+            resp={'errors':''}
+            if campos.has_key('file'):
+                imagen=campos['file']
+            if tipo=='recepcion':
+                albaran=valid_filename(campos.get('albaran'))
+                row=db(db.pedpro.pedido==id).select(db.pedpro.pedido,db.pedpro.idproveedor,distinct=True).first()
+                if row:
+                    serie='PP'
+                    filename = '%s_alb%s.pdf'%(id,albaran)
+                    camino=os.path.join(myconf.get('paths.docsprov') ,'%06d'% row.idproveedor)
+                    touch_dir(camino)
+                    camino=os.path.join(camino,'inspeccion_pte')
+                    touch_dir(camino)
+                    filepath = os.path.join(camino,filename)
+                    f=open(filepath,'wb')
+                    f.write(imagen.value)
+                    f.flush()
+                    f.close()
+                    #aqui una vez guardado, habría que parsearlo para ver si está bien rellenado
+                    r=verifica_formulario_recepcion(filepath)
+                    if r:
+                        resp={'errors': r}
+            else:
+                raise HTTP(400,"Tipo %s no previsto" %tipo)
+            if not row:
+                resp={'errors':T('Register not found')}
+            return dict(resp=[resp])
+        elif funcion=='pictures':
+            if not campos.has_key('serie') or not campos.has_key('id'): raise HTTP(400, campos)
+            id=campos['id']
+            serie=campos['serie']
+            resp={}
+            resp['serie']=serie
+            resp['id']=serie
+            if serie=='CA':
+                camino=os.path.join(myconf.get('paths.docscargas') ,'%06d'% int(id))
+            else:
+                camino=''
+            if camino:
+                touch_dir(camino)
+                imagen=None
+                resp['errors']='No se guardaron imágenes'
+                resp['imagenes']=[]
+                resp['funcion']=funcion
+                for k in campos:
+                    if k.startswith('imagen'):
+                        imagen=campos[k]
+                        filename=k.split('imagen_')[1]
+                        filepath = os.path.join(camino,filename)
+                        f=open(filepath,'wb')
+                        f.write(imagen.value)
+                        f.flush()
+                        f.close()
+                        resp['resp']='ok'
+                        resp['imagenes']+=[filename]
+                        resp['errors']=''
+            else:
+                resp['errors']='Serie %s no tiene establecido guardar imágenes.'%serie
+            return dict(resp=[resp])
+        elif funcion=='pic_sign':
+            if not campos.has_key('serie') or not campos.has_key('id'): raise HTTP(400, campos)
+            id=campos['id']
+            serie=campos['serie']
+            resp={}
+            if campos.has_key('imagen'):
+                imagen=campos['imagen']
+            if serie=='NE':
+                row=db(db.entregas.id==id).select()
+                if row:
+                    filename=id+'.pdf'
+                    firma = os.path.join(request.folder, 'uploads', 'NE%s.jpg'%id)
+                    f=open(firma,'wb')
+                    f.write(imagen.value)
+                    f.flush()
+                    f.close()
+                    filepath = os.path.join(myconf.get('paths.docs'), serie, filename)
+                    imprime_nota(row,firma,dest=filepath)
+                    row0=db.entregas0(id)
+                    resp=row0.update_record(estado=806)
+                    try:
+                        os.remove(firma)
+                    except:
+                        pass
+            else:
+                raise HTTP(400,"Serie %s no prevista" %serie)
+            if not row:
+                resp={'errors':T('Register not found')}
+            return dict(resp=[resp])
+        elif funcion=='open_ot_tmp2':
+            #abre un orden de trabajo temporal
+            #tipo =SEGUN TABLA TIPOS
+            operario=campos.get("operario")
+            #ahora abrimos la OT genérica comodín
+            codigotrabajo=campos.get('tipo')
+            ordfab=int(campos.get("ordfab",CODIGOSTALLER.ordfabComodin))
+            observaciones=campos.get("observaciones")
+            if ordfab==CODIGOSTALLER.ordfabComodin:
+                codtra=CODIGOSTALLER.piezaComodin
+            else:
+                codtra=CODIGOSTALLER.piezaTrabajosComplementarios
+            rowc=db((db.ot.ordfab==ordfab) & (db.ot.codigopieza==codtra) & (db.ot.codigotrabajo==codigotrabajo)).select(db.ot.id).first()
+            if not rowc:
+                resp={'errors':T('O.T. Comodín of:%s t:%s no encontrada'%(ordfab,codigotrabajo))}
+            else:
+                row=db((db.ot_lin.operario==operario) &(db.ot_lin.fin==None)).select(db.ot_lin.ot,left=db.ot.on(db.ot.id==db.ot_lin.ot))
+                if row: #cerramos en pause toda ot abierta
+                    for r in row:
+                        resp=closeot(r.ot,0,'3',operario=operario) #modo:3=pausar (antes pausar era 1, ahora pausar es 3, 1 es parcialmente cerrado
+                        if resp.get('errors'):
+                            #raise HTTP(400,"error %s" % resp['errors'])
+                            db.rollback()
+                            return dict(resp=[resp])
+                ot=rowc.id
+                resp= openot(ot,{'ot':ot,'actividad':ACTIVIDADES.preparacion,'maquina':0,'operarios':operario,'observaciones':observaciones})
+            return dict(resp=[resp])
+        elif funcion=='open_ot_tmp': #OBSOLETA, ELIMINAR CUANDO SE ACTUALICEN LAS TABLETS CON LA ULTIMA VERSION
+            #abre un orden de trabajo temporal
+            #tipo =0 cargas;  tipo=1 descargas
+            operario=campos.get("operario")
+            #ahora abrimos la OT genérica comodín
+            tipo=campos.get("tipo")
+            codigotrabajo=CODIGOSTALLER.codigoDescargas if tipo=='1' else CODIGOSTALLER.codigoCargas
+            rowc=db((db.ot.ordfab==1) & (db.ot.codigopieza==CODIGOSTALLER.piezaComodin) & (db.ot.codigotrabajo==codigotrabajo)).select(db.ot.id).first()
+            if not rowc:
+                resp={'errors':T('O.T. Comodín no encontrada')}
+            else:
+                row=db((db.ot_lin.operario==operario) &(db.ot_lin.fin==None)).select(db.ot_lin.ot,left=db.ot.on(db.ot.id==db.ot_lin.ot))
+                if row: #cerramos en pause toda ot abierta
+                    for r in row:
+                        resp=closeot(r.ot,0,'3',operario=operario) #modo:3=pausar (antes pausar era 1, ahora pausar es 3, 1 es parcialmente cerrado
+                        if resp.get('errors'):
+                            #raise HTTP(400,"error %s" % resp['errors'])
+                            db.rollback()
+                            return dict(resp=[resp])
+                ot=rowc.id
+                resp= openot(ot,{'ot':ot,'actividad':ACTIVIDADES.preparacion,'maquina':0,'operarios':operario})
+            return dict(resp=[resp])
+        elif funcion=='open_ot':
+            ot=campos.get('ot')
+            row= db.ot(ot)
+            if row:
+                resp={}
+                #if row('idestado') ==ESTADOS_ORDFAB.abierta:
+                #    resp['errors']='OT está ya abierta'
+                #else:
+                    #chequear parametros: maquina, actividad, operario que haya al menos un operario,
+                resp=openot(ot,campos)
+                return dict(resp=[resp])
+            else:
+                raise HTTP(400,"No existe OT %s" %ot)
+        elif funcion=='close_ot':
+            ot=campos.get('ot')
+            row= db.ot(ot)
+            cantidad=campos.get('cantidad',0)
+            actividad=campos.get('idactividad')
+            operarios=campos.get("operarios")
+            if not operarios:
+                operarios=campos.get("operario")
+            observaciones=campos.get("observaciones")
+            materias=campos.get("materias")
+            if materias:
+                materias=eval(materias)
+            #raise HTTP(400,cantidad)
+            modo=campos.get("modo","0") #modo 0: pausar, modo 1: cerrar, modo 2: cerar/abrir con otra actividad
+            reabrir=campos.get("reabrir_pausadas")
+            resp={}
+            if row:
+                if row('idestado') ==ESTADOS_ORDFAB.abierta:
+                     resp=closeot(ot,cantidad,modo,actividad=actividad,operario=operarios,observaciones=observaciones,materias=materias)
+                else:
+                     resp['errors']="No hay partes abiertos de la OT"
+                if reabrir:
+                     resp=reabrirpausadas(campos.get("operario"))
+                """ if materias:
+                    materias=eval(materias)
+                    for item in materias:
+                            id=item.get("id")
+                            mp=db.materias_ordfab(id)
+                            dc=dict(consumida=datetime.datetime.strftime(request.now,SQL_TIME_FORMAT))
+                            if item.get('materia'):
+                                    dc['cambiada']=datetime.datetime.strftime(request.now,SQL_TIME_FORMAT)
+                                    dc['materia']=item.get('idmateria')
+                            if mp:
+                                mp.update_record(**dc)
+                """
+                return dict(resp=[resp])
+            else:
+                raise HTTP(400,"No existe OT %s" %ot)
+        else:
+             raise HTTP(400,'Función %s no válida' % funcion)
+                
+    return locals()

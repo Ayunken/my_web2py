@@ -1,0 +1,65 @@
+Atributos en Las configuraciones
+
+-Atributos Base:
+Equivalen a los atributos del tipo raiz. Automáticamente se crea un tipo de kit en la configuracion raiz \ donde se asignan los atributos base
+Todos los atributos que se asignen en un tipo kit ese tipo y a los tipos de kists descendientes de ese.
+Si el mimso atributo está asignado en varios niveles, se tomara el valor del atributo del último nivel donde esté definido.
+
+Para efectuar el filtro de kits de un TIPO DE KIT se hará así:
+
+-Se seleccionan todos los módulos que tienen al menos ese tipo kit en ubicación
+-Se seleccionan los atributos de todos esos módulos buscando coincidencia en la lista de atributos de ese kit y sus ascendentes
+ ordenados por kit, tipo de kit, level
+ Los modulos que tengan esas propiedades y no coincida el rango, se eliminan
+ Los que coincidadn rangos, se quedan.
+ Los que no tengan esas propiedades, también se quedan seleccionados
+
+
+ Presupuesos: Atributos.
+
+ Para conformar la list de atributos que en el presupuesto se quedan como atributos visibles:
+   -Habrá que añadir algun campo en los atributos base de configuración que indique si se ha de ver o no en el presupuesto.
+   Además habrá que añadir dicho campo también en los mod_pre_atr.
+   -Los que se quedan visibles, hay que mostrarlos ordenados por grupo y segun el campo orden del maestro de atributos
+   -Además ha un campo visibilidad que hay que tener en cuenta calcularlo en base a la formula del atributo o importado del atr de cfg.
+   -En atributos de presupuestos pues habrá que visualizar los que visibilidad=1, ordenados por grupos y orden del maestro ATR.
+   -Los atributos que no sean opcion, no aplicarle widget de options, sino de string con el valor concreto.
+   -Hay variables que a priori no tienen valor porque dependen de otras (como matriz_largo depende de la configuración de naves).
+   -De todas formas para el presupuesto habrá que empezar a pensar en una serie de formularios en plan asistente:
+   -Optimizar la muestra de variables del presupuesto pues la carga de optiones personalizados es lenta.
+
+Invernaderos: Variables
+-las canales calculadas se encuentran en el objeto @_canales
+Tiene propiedades izq,der,med, tap, baj
+izq,der y med tiene subpropiedades, subpropiedades cbj/sbj/cum
+Cada propiedad final es un diccionario de longitud como clave y valor unidades.
+@_canales.izq.cbj={6:12,3:1} Contiene que las canales  izquierda con bajante: 12 de 6 m y 1 de 3 m.
+@_canales.tab y @._canales.baj directamente tienen el numero de unidades totales
+
+-VENTILACIONES:
+ Atributos base de selección en presupuesto
+ -Ventilación General a usar: simple, doble o ninguna.
+ -Distribución de ventilaciones: Todas, Cada 2, Cada 3, Cada 4,
+
+ Derivadas de las anteriores vendrán atributos calculados, algunos modificables en un GUI o directamente (para ajustar p.e. la posición de las particiones)
+ -Partición de Techo: Número de particiones (0,1,2,...) Se precalculará en función al atributo general (*) MetrosParticionTecho y si hay ventilaciones
+ -Particiones de Film:  Número de particiones (0,1,2,...) Se precalculará en función al atributo general (*) MetrosParticionFilm y si hay Film
+ Y Finalmente los atributos de los que deben beber las formulas de los kits o el GUI
+ -VentilacionesNaves: Lista con el tipo de ventilación por cada nave: ninguna, simple izq, simple der, doble.
+ -ParticionesTechoPosy: lista con las posiciones de partición de techo de cada nave. Cada item a su vez es una lista, ya que cada nave puede tener más de una partición.
+ -ParticionesFilmPosy: lista con las posiciones de partición de cada nave. Cada item a su vez es una lista, ya que cada nave puede tener más de una partición.
+ -SegmentosVC: (unidades) {ancho: []
+
+ En configuración de naves no se va a establecer ventilación, sino que será un apartado posterior basado en GUI (seleccion de naves en grafico de invernadero para cambiar
+ propiedades de cada nave, como p.e., tipo de ventilación de cada nave (para modificar lista ventilacionesnaves.
+
+
+
+(*) Debe haber uns atributos generales con valor por defecto que no hace falta incluir en configuraciones y cuyo valor actua como constante global
+Pero si se incluyen, sí pueden modificarse en el presupuesto, como bajantes (metros cada bajante)
+-MetrosParticionTecho
+-MetrosParticionPlastico
+-MetrosBajantes
+
+atributos:
+-

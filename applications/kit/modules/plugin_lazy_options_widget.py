@@ -1,0 +1,149 @@
+# -*- coding: utf-8 -*-
+# This plugins is licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+# Authors: Kenji Hosoda <hosoda@s-cubism.jp>
+from gluon import *
+T=current.T
+
+class lazy_options_widget(SQLFORM.widgets.options):
+
+    def __init__(self, on_key,  where,
+                 trigger=None,
+                 default='---', # por defecto en caso de trigger vacio
+                 keyword='_lazy_options_%(tablename)s_%(fieldname)s',
+                 orderby=None,
+                 user_signature=False,
+                 hmac_key=None,
+                 field=None,
+                 multiple=False,
+                 lazy_default=None): # valor a tomar por defecto de entre las options, condicionado por el trigger
+        self.on_key, self.where = (
+            on_key, where
+        )
+        self.trigger, self.default, self.keyword, self.orderby , self.multiple, self.lazy_default= (
+            trigger, default, keyword, orderby, multiple, lazy_default
+        )
+        self.default=DIV(self.default)
+        self.user_signature, self.hmac_key = user_signature, hmac_key
+        self._emptyenable = False
+        if field:
+            self.process_now(field)
+        #if multiple:
+        #    current.response.files.append(URL(r=current.request,c='static/ui/multiselect',f='jquery.multiselect.css'))
+        #    current.response.files.append(URL(r=current.request,c='static/ui/multiselect',f='jquery.multiselect.min.js'))
+
+    def _get_select_el(self, trigger, field, value=None):
+        
+        if trigger or True:
+            from gluon.sqlhtml import OptionsWidget
+            select_widget=OptionsWidget.widget(field, value)
+            self._require.orderby = self.orderby or self._require.orderby
+            self._require.dbset = self._require.dbset(self.where(trigger))
+            self._require.multiple=self.multiple or self._require.multiple
+            options = self._require.options()
+            if  self._require.multiple and value:
+                if isinstance(value,(list,tuple)):
+                    opts = [OPTION(v, _value=k,_selected=('selected' if (k in value or int(k) in value) else ' ')) for (k, v) in options]
+                else:
+                    opts = [OPTION(v, _value=k,_selected=('selected' if  (str(k)==str(value))  else ' ')) for (k, v) in options]
+            elif value:
+                 opts = [OPTION(v, _value=k,_selected=('selected' if int(k or 0)==value  else ' ')) for (k, v) in options]
+            else:
+                 opts = [OPTION(v, _value=k) for (k, v) in options]
+            if len(opts)==1 and not self._emptyenable:
+                opts[0]['_selected']='selected'
+            else:
+                for k in opts:
+                    if k['_selected'] == ' ':
+                        del k['_selected']
+
+            select_widget.elements('option',replace=None)
+            sel=select_widget.element('select')
+            #sel['_opciones']=options
+            #sel['_valor']=value
+            #sel['_trigger']=value
+            sel['_id']='%s' % self._el_id
+            sel['_multiple']=self._require.multiple
+            sel['_class']='generic-widget form-control'
+            select_widget.components.extend(opts)
+            return select_widget
+        else:
+            return self.default
+
+    def _pre_process(self, field):
+        self._keyword = self.keyword % dict(fieldname=field.name,tablename=field._tablename)
+        self._el_id = '%s_%s' % (field._tablename, field.name)
+        self._disp_el_id = '%s__display' % self._el_id
+
+        requires = field.requires
+
+        if isinstance(requires, IS_EMPTY_OR):
+            self._emptyenable=True
+            requires = requires.other
+        if not isinstance(requires, (list, tuple)):
+            requires = [requires]
+        if requires:
+            if hasattr(requires[0], 'options'):
+                self._require = requires[0]
+            else:
+                raise SyntaxError('widget cannot determine options of %s' % field)
+        else:
+            self._require = []
+
+    def process_now(self, field):
+        if not hasattr(self, '_keyword'):
+            self._pre_process(field, )
+
+        if self._keyword in current.request.vars:
+            if self.user_signature:
+                if not URL.verify(current.request, user_signature=self.user_signature, hmac_key=self.hmac_key):
+                    raise HTTP(400)
+
+            trigger = current.request.vars[self._keyword]
+            if self.lazy_default and trigger:
+                value=self.lazy_default(trigger)
+            else:
+                value=None
+            raise HTTP(200, self._get_select_el(trigger,field,value))
+        return self
+
+    def __call__(self, field, value, **attributes):
+        self._pre_process(field)
+
+        request = current.request
+        if hasattr(request, 'application'):
+            self.url = URL(r=request, args=request.args,
+                           user_signature=self.user_signature, hmac_key=self.hmac_key)
+            self.process_now(field)
+        else:
+            self.url = request
+        if self.multiple:
+            script_multi = 'function F%(id)s(){$("#%(id)s").multiselect({'\
+                 'maxItems  : -1, defaultDisplayTitle: "%(tx)s"})};' % dict(id=self._el_id,tx=T('Ninguno seleccionado'))
+            fun_multi='F%s();' % self._el_id
+        else:
+            script_multi=''
+            fun_multi=''
+        script_el = SCRIPT("""
+%(script_multi)s
+$( "#%(on_key)s").change(function(e) {
+        $("#%(disp_el_id)s ").html("%(default)s");
+        var query = {};
+        var val=$( this ).val();
+        query["%(keyword)s"] = val;
+        $.ajax({type: "POST", url: "%(url)s", data: query,
+            success: function(html) {
+              $("#%(disp_el_id)s").html(html); %(fun_multi)s
+        }});
+    });
+    %(fun_multi)s
+""" % dict(on_key=self.on_key,
+              disp_el_id=self._disp_el_id,
+              default=self.default,
+              keyword=self._keyword,url=self.url,fun_multi=fun_multi, script_multi=script_multi))
+
+        select_el = self._get_select_el(self.trigger, field,value) #if self.trigger else '---'
+
+        el = DIV(script_el,
+                 SPAN(select_el or self.default, _id=self._disp_el_id),
+                 _id='%s__div'%self._el_id)
+        return el

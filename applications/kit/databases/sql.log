@@ -1,0 +1,3411 @@
+timestamp: 2016-10-07T10:35:37.123904
+CREATE TABLE mod_um(
+    id INT IDENTITY PRIMARY KEY,
+    name VARCHAR(30) NULL,
+    cod_SI VARCHAR(10) NULL,
+    main_um INT NULL,
+    factor FLOAT NULL
+);
+timestamp: 2016-10-07T10:41:23.845544
+CREATE TABLE mod_um(
+    id INT IDENTITY PRIMARY KEY,
+    name VARCHAR(30) NULL,
+    cod_SI VARCHAR(10) NULL,
+    main_um INT NULL,
+    factor FLOAT NULL
+);
+faked!
+timestamp: 2016-10-07T10:41:23.848968
+CREATE TABLE mod_tipos(
+    id INT IDENTITY PRIMARY KEY,
+    parent INT  NULL , CONSTRAINT mod_tipos_parent__constraint FOREIGN KEY (parent) REFERENCES mod_tipos (id) ON DELETE NO ACTION,
+    tree_id INT NULL,
+    level INT NULL,
+    lft INT NULL,
+    rgt INT NULL,
+    name VARCHAR(512) NULL,
+    node_type VARCHAR(512) NULL,
+    created_on DATETIME NULL
+);
+faked!
+timestamp: 2016-10-07T10:41:23.851584
+CREATE TABLE mod_grp_atr(
+    id INT IDENTITY PRIMARY KEY,
+    parent INT  NULL , CONSTRAINT mod_grp_atr_parent__constraint FOREIGN KEY (parent) REFERENCES mod_grp_atr (id) ON DELETE NO ACTION,
+    tree_id INT NULL,
+    level INT NULL,
+    lft INT NULL,
+    rgt INT NULL,
+    name VARCHAR(512) NULL,
+    node_type VARCHAR(512) NULL,
+    created_on DATETIME NULL
+);
+faked!
+timestamp: 2016-10-07T10:41:23.854568
+CREATE TABLE mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NULL,
+    clave VARCHAR(20) NULL,
+    um INT  NULL , CONSTRAINT mod_atr_um__constraint FOREIGN KEY (um) REFERENCES mod_um (id) ON DELETE CASCADE,
+    grp_atr INT  NULL , CONSTRAINT mod_atr_grp_atr__constraint FOREIGN KEY (grp_atr) REFERENCES mod_grp_atr (id) ON DELETE CASCADE,
+    tipo VARCHAR(1) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(512) NULL,
+    val_def_disp VARCHAR(512) NULL,
+    rango VARCHAR(512) NULL
+);
+faked!
+timestamp: 2016-10-07T10:41:23.857845
+CREATE TABLE mod(
+    id INT IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NULL,
+    tipo INT  NULL , CONSTRAINT mod_tipo__constraint FOREIGN KEY (tipo) REFERENCES mod_tipos (id) ON DELETE CASCADE,
+    um INT  NULL , CONSTRAINT mod_um__constraint FOREIGN KEY (um) REFERENCES mod_um (id) ON DELETE CASCADE
+);
+faked!
+timestamp: 2016-10-07T10:41:23.860696
+CREATE TABLE mod_cmp(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_cmp_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    cmp_tipo VARCHAR(1) NULL,
+    cmp_pie INT NULL,
+    cmp_mod INT NULL,
+    formula VARCHAR(512) NULL
+);
+faked!
+timestamp: 2016-10-07T10:41:23.863648
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(512) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+faked!
+timestamp: 2016-10-07T10:41:23.865183
+CREATE TABLE mod_val(
+    id INT IDENTITY PRIMARY KEY,
+    atr INT  NULL , CONSTRAINT mod_val_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valor VARCHAR(512) NULL,
+    name VARCHAR(100) NULL
+);
+faked!
+timestamp: 2016-10-07T10:41:23.867341
+CREATE TABLE mod_cfg(
+    id INT IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NULL,
+    cfg_base INT  NULL , CONSTRAINT mod_cfg_cfg_base__constraint FOREIGN KEY (cfg_base) REFERENCES mod_cfg (id) ON DELETE CASCADE
+);
+faked!
+timestamp: 2016-10-07T10:41:23.870170
+CREATE TABLE mod_cfg_mod(
+    id INT IDENTITY PRIMARY KEY,
+    cfg INT  NULL , CONSTRAINT mod_cfg_mod_cfg__constraint FOREIGN KEY (cfg) REFERENCES mod_cfg (id) ON DELETE CASCADE,
+    mod INT  NULL , CONSTRAINT mod_cfg_mod_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    formula VARCHAR(512) NULL
+);
+faked!
+timestamp: 2016-10-07T10:41:23.873030
+CREATE TABLE mod_cfg_atr(
+    id INT IDENTITY PRIMARY KEY,
+    cfg INT  NULL , CONSTRAINT mod_cfg_atr_cfg__constraint FOREIGN KEY (cfg) REFERENCES mod_cfg (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_cfg_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(512) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+faked!
+timestamp: 2016-10-07T12:22:35.507864
+CREATE TABLE auth_user(
+    id INT IDENTITY PRIMARY KEY,
+    first_name VARCHAR(128) NULL,
+    last_name VARCHAR(128) NULL,
+    email VARCHAR(512) NULL,
+    username VARCHAR(128) NULL,
+    password VARCHAR(512) NULL,
+    registration_key VARCHAR(512) NULL,
+    reset_password_key VARCHAR(512) NULL,
+    registration_id VARCHAR(512) NULL,
+    desactivado BIT NULL,
+    language_code VARCHAR(5) NULL
+);
+timestamp: 2016-10-07T13:47:40.292928
+CREATE TABLE auth_user(
+    id INT IDENTITY PRIMARY KEY,
+    first_name VARCHAR(128) NULL,
+    last_name VARCHAR(128) NULL,
+    email VARCHAR(512) NULL,
+    username VARCHAR(128) NULL,
+    password VARCHAR(512) NULL,
+    registration_key VARCHAR(512) NULL,
+    reset_password_key VARCHAR(512) NULL,
+    registration_id VARCHAR(512) NULL,
+    desactivado BIT NULL,
+    language_code VARCHAR(5) NULL
+);
+timestamp: 2016-10-07T13:48:53.804205
+CREATE TABLE auth_user(
+    id INT IDENTITY PRIMARY KEY,
+    first_name VARCHAR(128) NULL,
+    last_name VARCHAR(128) NULL,
+    email VARCHAR(512) NULL,
+    username VARCHAR(128) NULL,
+    password VARCHAR(512) NULL,
+    registration_key VARCHAR(512) NULL,
+    reset_password_key VARCHAR(512) NULL,
+    registration_id VARCHAR(512) NULL,
+    desactivado BIT NULL,
+    language_code VARCHAR(5) NULL
+);
+faked!
+timestamp: 2016-10-07T13:48:58.303107
+CREATE TABLE auth_group(
+    id INT IDENTITY PRIMARY KEY,
+    role VARCHAR(512) NULL,
+    description TEXT NULL
+);
+faked!
+timestamp: 2016-10-07T13:48:58.308162
+CREATE TABLE auth_membership(
+    id INT IDENTITY PRIMARY KEY,
+    user_id INT  NULL , CONSTRAINT auth_membership_user_id__constraint FOREIGN KEY (user_id) REFERENCES auth_user (id) ON DELETE CASCADE,
+    group_id INT  NULL , CONSTRAINT auth_membership_group_id__constraint FOREIGN KEY (group_id) REFERENCES auth_group (id) ON DELETE CASCADE
+);
+faked!
+timestamp: 2016-10-07T13:48:58.315889
+CREATE TABLE auth_event(
+    id INT IDENTITY PRIMARY KEY,
+    time_stamp DATETIME NULL,
+    client_ip VARCHAR(512) NULL,
+    user_id INT  NULL , CONSTRAINT auth_event_user_id__constraint FOREIGN KEY (user_id) REFERENCES auth_user (id) ON DELETE CASCADE,
+    origin VARCHAR(512) NULL,
+    description TEXT NULL
+);
+faked!
+timestamp: 2016-10-07T13:49:15.398762
+CREATE TABLE mod_pre_mod(
+    id INT IDENTITY PRIMARY KEY,
+    pre INT  NULL , CONSTRAINT mod_pre_mod_pre__constraint FOREIGN KEY (pre) REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    mod INT  NULL , CONSTRAINT mod_pre_mod_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    cantidad INT NULL
+);
+faked!
+timestamp: 2016-10-07T13:56:32.885715
+CREATE TABLE Presupuestos(
+    cod_pre INT IDENTITY PRIMARY KEY,
+    descri VARCHAR(50) NULL,
+    fecha DATETIME NULL,
+    NPresupuesto INT NULL,
+    cfg INT  NULL , CONSTRAINT mod_pre_cfg__constraint FOREIGN KEY (cfg) REFERENCES mod_cfg (id) ON DELETE CASCADE
+);
+timestamp: 2016-10-07T13:56:57.885210
+CREATE TABLE Presupuestos(
+    cod_pre INT IDENTITY PRIMARY KEY,
+    descri VARCHAR(50) NULL,
+    fecha DATETIME NULL,
+    NPresupuesto INT NULL,
+    cfg INT  NULL , CONSTRAINT mod_pre_cfg__constraint FOREIGN KEY (cfg) REFERENCES mod_cfg (id) ON DELETE CASCADE
+);
+faked!
+timestamp: 2016-10-07T14:01:37.962075
+CREATE TABLE mod_pre_atr(
+    id INT IDENTITY PRIMARY KEY,
+    pre INT  NULL , CONSTRAINT mod_pre_atr_pre__constraint FOREIGN KEY (pre) REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_pre_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    atr_val INT  NULL , CONSTRAINT mod_pre_atr_atr_val__constraint FOREIGN KEY (atr_val) REFERENCES mod_val (id) ON DELETE CASCADE,
+    valor VARCHAR(512) NULL
+);
+faked!
+timestamp: 2016-10-07T14:06:17.733784
+CREATE TABLE auth_permission(
+    id INT IDENTITY PRIMARY KEY,
+    group_id INT  NULL , CONSTRAINT auth_permission_group_id__constraint FOREIGN KEY (group_id) REFERENCES auth_group (id) ON DELETE CASCADE,
+    name VARCHAR(512) NULL,
+    table_name VARCHAR(512) NULL,
+    record_id INT NULL
+);
+faked!
+timestamp: 2016-10-07T14:06:17.756136
+CREATE TABLE auth_cas(
+    id INT IDENTITY PRIMARY KEY,
+    user_id INT  NULL , CONSTRAINT auth_cas_user_id__constraint FOREIGN KEY (user_id) REFERENCES auth_user (id) ON DELETE CASCADE,
+    created_on DATETIME NULL,
+    service VARCHAR(512) NULL,
+    ticket VARCHAR(512) NULL,
+    renew BIT NULL
+);
+faked!
+timestamp: 2016-10-10T09:19:04.617530
+CREATE TABLE mod_pre_atr(
+    id INT IDENTITY PRIMARY KEY,
+    pre INT  NULL , CONSTRAINT mod_pre_atr_pre__constraint FOREIGN KEY (pre) REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_pre_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    atr_val INT  NULL , CONSTRAINT mod_pre_atr_atr_val__constraint FOREIGN KEY (atr_val) REFERENCES mod_val (id) ON DELETE CASCADE,
+    valor VARCHAR(512) NULL
+);
+timestamp: 2016-10-10T09:25:08.145724
+CREATE TABLE mod_pre_atr(
+    id INT IDENTITY PRIMARY KEY,
+    pre INT  NULL , CONSTRAINT mod_pre_atr_pre__constraint FOREIGN KEY (pre) REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_pre_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    atr_val INT NULL,
+    valor VARCHAR(512) NULL
+);
+success!
+timestamp: 2016-10-10T12:47:20.331440
+ALTER TABLE mod_atr ADD abreviatura VARCHAR(10) NULL;
+success!
+timestamp: 2016-10-18T13:26:06.346975
+CREATE TABLE mod_cfl(
+    id INT IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NULL
+);
+success!
+timestamp: 2016-10-18T13:27:42.168106
+ALTER TABLE mod_cfg ADD cfl_base INT  NULL ; ALTER TABLE mod_cfg ADD CONSTRAINT mod_cfg_cfl_base__constraint FOREIGN KEY (cfl_base) REFERENCES mod_cfl (id) ON DELETE CASCADE;
+timestamp: 2016-10-18T13:27:42.227912
+ALTER TABLE mod_cfg DROP COLUMN cfg_base;
+success!
+timestamp: 2016-10-18T13:52:10.517009
+CREATE TABLE mod_cfl_tip(
+    id INT IDENTITY PRIMARY KEY,
+    cfl INT  NULL , CONSTRAINT mod_cfl_tip_cfl__constraint FOREIGN KEY (cfl) REFERENCES mod_cfl (id) ON DELETE CASCADE,
+    mod_tipo INT  NULL , CONSTRAINT mod_cfl_tip_mod_tipo__constraint FOREIGN KEY (mod_tipo) REFERENCES mod_tipos (id) ON DELETE CASCADE,
+    min_mods INT NULL,
+    formula VARCHAR(512) NULL
+);
+success!
+timestamp: 2016-11-04T08:36:56.346981
+ALTER TABLE mod_cfg_mod ADD tipo INT  NULL ; ALTER TABLE mod_cfg_mod ADD CONSTRAINT mod_cfg_mod_tipo__constraint FOREIGN KEY (tipo) REFERENCES mod_tipos (id) ON DELETE CASCADE;
+timestamp: 2016-11-04T08:37:58.555706
+ALTER TABLE mod_cfg_mod ADD tipo INT NULL;
+success!
+success!
+timestamp: 2016-12-05T12:26:27.164228
+ALTER TABLE mod_atr ADD orden_descripcion INT NULL;
+success!
+timestamp: 2016-12-05T12:30:32.112072
+ALTER TABLE mod ADD name__tmp VARCHAR(200) NULL;
+UPDATE mod SET name__tmp=name;
+ALTER TABLE mod DROP COLUMN name;
+ALTER TABLE mod ADD name VARCHAR(200) NULL;
+UPDATE mod SET name=name__tmp;
+ALTER TABLE mod DROP COLUMN name__tmp;
+timestamp: 2016-12-05T12:30:32.222410
+ALTER TABLE mod ADD name_fix VARCHAR(200) NULL;
+success!
+timestamp: 2016-12-13T16:15:40.757490
+ALTER TABLE mod_tipos ADD abreviatura VARCHAR(50) NULL;
+success!
+timestamp: 2016-12-14T15:20:10.755872
+CREATE TABLE mod_cfl_atr(
+    id INT IDENTITY PRIMARY KEY,
+    cfl INT  NULL , CONSTRAINT mod_cfl_atr_cfl__constraint FOREIGN KEY (cfl) REFERENCES mod_cfl (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_cfl_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(512) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+success!
+timestamp: 2016-12-19T09:03:10.394387
+ALTER TABLE mod_pre_atr ADD tipo VARCHAR(1) NULL;
+timestamp: 2016-12-19T09:03:10.426605
+ALTER TABLE mod_pre_atr ADD lock BIT NULL;
+timestamp: 2016-12-19T09:03:10.443349
+ALTER TABLE mod_pre_atr ADD val_def INT NULL;
+timestamp: 2016-12-19T09:03:10.453657
+ALTER TABLE mod_pre_atr ADD valores TEXT NULL;
+timestamp: 2016-12-19T09:03:10.479939
+ALTER TABLE mod_pre_atr ADD rango VARCHAR(512) NULL;
+timestamp: 2016-12-19T09:03:10.487902
+ALTER TABLE mod_pre_atr ADD val_def_formula VARCHAR(512) NULL;
+timestamp: 2016-12-19T09:03:10.502533
+ALTER TABLE mod_pre_atr DROP COLUMN atr_val;
+timestamp: 2016-12-19T09:03:10.517273
+ALTER TABLE mod_pre_atr DROP COLUMN valor;
+success!
+timestamp: 2016-12-19T09:23:26.329554
+ALTER TABLE mod_pre_atr ADD atr_val INT NULL;
+timestamp: 2016-12-19T09:23:26.393635
+ALTER TABLE mod_pre_atr ADD valor VARCHAR(512) NULL;
+timestamp: 2016-12-19T09:23:26.410340
+ALTER TABLE mod_pre_atr DROP COLUMN tipo;
+timestamp: 2016-12-19T09:23:26.419533
+ALTER TABLE mod_pre_atr DROP COLUMN lock;
+timestamp: 2016-12-19T09:23:26.429500
+ALTER TABLE mod_pre_atr DROP COLUMN val_def;
+timestamp: 2016-12-19T09:23:26.444219
+ALTER TABLE mod_pre_atr DROP COLUMN valores;
+timestamp: 2016-12-19T09:23:26.463598
+ALTER TABLE mod_pre_atr DROP COLUMN rango;
+timestamp: 2016-12-19T09:23:26.471914
+ALTER TABLE mod_pre_atr DROP COLUMN val_def_formula;
+success!
+timestamp: 2016-12-19T13:28:52.878429
+ALTER TABLE mod_pre_atr DROP COLUMN atr_val;
+success!
+timestamp: 2016-12-22T22:54:15.300671
+ALTER TABLE mod_atr ADD val_def_disp__tmp VARCHAR(100) NULL;
+UPDATE mod_atr SET val_def_disp__tmp=val_def_disp;
+ALTER TABLE mod_atr DROP COLUMN val_def_disp;
+ALTER TABLE mod_atr ADD val_def_disp VARCHAR(100) NULL;
+UPDATE mod_atr SET val_def_disp=val_def_disp__tmp;
+ALTER TABLE mod_atr DROP COLUMN val_def_disp__tmp;
+timestamp: 2016-12-22T22:54:15.359419
+ALTER TABLE mod_atr ADD rango__tmp VARCHAR(50) NULL;
+UPDATE mod_atr SET rango__tmp=rango;
+ALTER TABLE mod_atr DROP COLUMN rango;
+ALTER TABLE mod_atr ADD rango VARCHAR(50) NULL;
+UPDATE mod_atr SET rango=rango__tmp;
+ALTER TABLE mod_atr DROP COLUMN rango__tmp;
+timestamp: 2016-12-22T22:54:15.371610
+ALTER TABLE mod_atr ADD val_def_formula__tmp VARCHAR(100) NULL;
+UPDATE mod_atr SET val_def_formula__tmp=val_def_formula;
+ALTER TABLE mod_atr DROP COLUMN val_def_formula;
+ALTER TABLE mod_atr ADD val_def_formula VARCHAR(100) NULL;
+UPDATE mod_atr SET val_def_formula=val_def_formula__tmp;
+ALTER TABLE mod_atr DROP COLUMN val_def_formula__tmp;
+success!
+timestamp: 2016-12-22T22:54:15.406491
+ALTER TABLE mod_mod_atr ADD val_def_formula__tmp VARCHAR(100) NULL;
+UPDATE mod_mod_atr SET val_def_formula__tmp=val_def_formula;
+ALTER TABLE mod_mod_atr DROP COLUMN val_def_formula;
+ALTER TABLE mod_mod_atr ADD val_def_formula VARCHAR(100) NULL;
+UPDATE mod_mod_atr SET val_def_formula=val_def_formula__tmp;
+ALTER TABLE mod_mod_atr DROP COLUMN val_def_formula__tmp;
+success!
+timestamp: 2016-12-22T22:54:15.431305
+ALTER TABLE mod_cfl_atr ADD val_def_formula__tmp VARCHAR(100) NULL;
+UPDATE mod_cfl_atr SET val_def_formula__tmp=val_def_formula;
+ALTER TABLE mod_cfl_atr DROP COLUMN val_def_formula;
+ALTER TABLE mod_cfl_atr ADD val_def_formula VARCHAR(100) NULL;
+UPDATE mod_cfl_atr SET val_def_formula=val_def_formula__tmp;
+ALTER TABLE mod_cfl_atr DROP COLUMN val_def_formula__tmp;
+success!
+timestamp: 2016-12-22T22:54:15.473194
+ALTER TABLE mod_cfg_atr ADD val_def_formula__tmp VARCHAR(100) NULL;
+UPDATE mod_cfg_atr SET val_def_formula__tmp=val_def_formula;
+ALTER TABLE mod_cfg_atr DROP COLUMN val_def_formula;
+ALTER TABLE mod_cfg_atr ADD val_def_formula VARCHAR(100) NULL;
+UPDATE mod_cfg_atr SET val_def_formula=val_def_formula__tmp;
+ALTER TABLE mod_cfg_atr DROP COLUMN val_def_formula__tmp;
+success!
+timestamp: 2016-12-22T22:54:15.491974
+ALTER TABLE mod_pre_atr ADD valor__tmp VARCHAR(100) NULL;
+UPDATE mod_pre_atr SET valor__tmp=valor;
+ALTER TABLE mod_pre_atr DROP COLUMN valor;
+ALTER TABLE mod_pre_atr ADD valor VARCHAR(100) NULL;
+UPDATE mod_pre_atr SET valor=valor__tmp;
+ALTER TABLE mod_pre_atr DROP COLUMN valor__tmp;
+success!
+timestamp: 2016-12-23T09:19:02.732614
+ALTER TABLE mod_val ADD valor__tmp VARCHAR(50) NULL;
+UPDATE mod_val SET valor__tmp=valor;
+ALTER TABLE mod_val DROP COLUMN valor;
+ALTER TABLE mod_val ADD valor VARCHAR(50) NULL;
+UPDATE mod_val SET valor=valor__tmp;
+ALTER TABLE mod_val DROP COLUMN valor__tmp;
+timestamp: 2016-12-23T09:19:02.778631
+ALTER TABLE mod_val ADD abreviatura VARCHAR(15) NULL;
+success!
+timestamp: 2016-12-23T12:29:46.029249
+ALTER TABLE mod_atr DROP COLUMN val_def_disp;
+success!
+timestamp: 2016-12-23T13:24:49.357281
+ALTER TABLE mod_atr ADD val_def_disp VARCHAR(100) NULL;
+success!
+timestamp: 2016-12-23T13:32:54.531254
+ALTER TABLE mod_atr DROP COLUMN val_def_disp;
+success!
+timestamp: 2017-01-04T09:05:12.911725
+ALTER TABLE mod_atr ADD visibilidad VARCHAR(100) NULL;
+success!
+timestamp: 2017-11-07T13:26:03.224337
+CREATE TABLE mod_um(
+    id INT IDENTITY PRIMARY KEY,
+    name VARCHAR(30) NULL,
+    cod_SI VARCHAR(10) NULL,
+    main_um INT NULL,
+    factor FLOAT NULL
+);
+success!
+timestamp: 2017-11-07T13:26:03.265939
+CREATE TABLE mod_tipos(
+    id INT IDENTITY PRIMARY KEY,
+    parent INT  NULL , CONSTRAINT mod_tipos_parent__constraint FOREIGN KEY (parent) REFERENCES mod_tipos (id) ON DELETE NO ACTION,
+    tree_id INT NULL,
+    level INT NULL,
+    lft INT NULL,
+    rgt INT NULL,
+    name VARCHAR(512) NULL,
+    node_type VARCHAR(512) NULL,
+    abreviatura VARCHAR(50) NULL,
+    created_on DATETIME NULL
+);
+success!
+timestamp: 2017-11-07T13:26:03.282071
+CREATE TABLE mod_grp_atr(
+    id INT IDENTITY PRIMARY KEY,
+    parent INT  NULL , CONSTRAINT mod_grp_atr_parent__constraint FOREIGN KEY (parent) REFERENCES mod_grp_atr (id) ON DELETE NO ACTION,
+    tree_id INT NULL,
+    level INT NULL,
+    lft INT NULL,
+    rgt INT NULL,
+    name VARCHAR(512) NULL,
+    node_type VARCHAR(512) NULL,
+    created_on DATETIME NULL
+);
+success!
+timestamp: 2017-11-07T13:26:03.295818
+CREATE TABLE mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NULL,
+    clave VARCHAR(20) NULL,
+    um INT  NULL , CONSTRAINT mod_atr_um__constraint FOREIGN KEY (um) REFERENCES mod_um (id) ON DELETE CASCADE,
+    grp_atr INT  NULL , CONSTRAINT mod_atr_grp_atr__constraint FOREIGN KEY (grp_atr) REFERENCES mod_grp_atr (id) ON DELETE CASCADE,
+    tipo VARCHAR(1) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    rango VARCHAR(50) NULL,
+    abreviatura VARCHAR(10) NULL,
+    orden_descripcion INT NULL,
+    visibilidad VARCHAR(100) NULL
+);
+success!
+timestamp: 2017-11-07T13:26:03.310303
+CREATE TABLE mod(
+    id INT IDENTITY PRIMARY KEY,
+    name VARCHAR(200) NULL,
+    name_fix VARCHAR(200) NULL,
+    tipo INT  NULL , CONSTRAINT mod_tipo__constraint FOREIGN KEY (tipo) REFERENCES mod_tipos (id) ON DELETE CASCADE,
+    um INT  NULL , CONSTRAINT mod_um__constraint FOREIGN KEY (um) REFERENCES mod_um (id) ON DELETE CASCADE
+);
+success!
+timestamp: 2017-11-07T13:26:03.323532
+CREATE TABLE mod_cmp(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_cmp_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    cmp_tipo VARCHAR(1) NULL,
+    cmp_pie INT NULL,
+    cmp_mod INT NULL,
+    formula VARCHAR(512) NULL
+);
+success!
+timestamp: 2017-11-07T13:26:03.334634
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:26:12.847705
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:26:39.729679
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:27:03.696781
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:27:40.707481
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:28:10.666047
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:28:41.710213
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:29:10.979990
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:29:42.637717
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:30:18.573715
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:30:43.704577
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:31:22.366621
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:31:44.715904
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:32:23.550444
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:32:45.706085
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:33:26.463674
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:33:46.704476
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:34:26.705671
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:34:29.278699
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:34:47.710475
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:35:31.906801
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:35:48.749580
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:36:34.254745
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:36:49.749033
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:37:35.995929
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:37:50.852904
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:38:38.894782
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:38:51.719143
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:39:40.161913
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:39:52.685360
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:40:45.083289
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:40:53.691406
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:41:54.632111
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:41:54.929293
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:42:55.729369
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:42:55.971462
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:43:56.606688
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:43:56.895946
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:43:58.079385
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:43:58.841650
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:43:59.311644
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:44:56.716125
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:44:57.697691
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:45:56.717221
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-11-07T13:45:58.738940
+CREATE TABLE mod_mod_atr(
+    id INT IDENTITY PRIMARY KEY,
+    mod INT  NULL , CONSTRAINT mod_mod_atr_mod__constraint FOREIGN KEY (mod) REFERENCES mod (id) ON DELETE CASCADE,
+    atr INT  NULL , CONSTRAINT mod_mod_atr_atr__constraint FOREIGN KEY (atr) REFERENCES mod_atr (id) ON DELETE CASCADE,
+    valores TEXT NULL,
+    rango VARCHAR(512) NULL,
+    val_def INT NULL,
+    val_def_formula VARCHAR(100) NULL,
+    tipo VARCHAR(1) NULL,
+    lock BIT NULL
+);
+timestamp: 2017-12-15T10:45:00.559000
+CREATE TABLE mod_um(
+    id INT IDENTITY PRIMARY KEY,
+    name VARCHAR(30) NULL,
+    cod_SI VARCHAR(10) NULL,
+    main_um INT NULL,
+    factor FLOAT NULL
+);
+timestamp: 2017-12-15T10:45:11.499000
+CREATE TABLE mod_um(
+    id INT IDENTITY PRIMARY KEY,
+    name VARCHAR(30) NULL,
+    cod_SI VARCHAR(10) NULL,
+    main_um INT NULL,
+    factor FLOAT NULL
+);
+timestamp: 2017-12-15T10:46:21.894000
+CREATE TABLE mod_um(
+    id INT IDENTITY PRIMARY KEY,
+    name VARCHAR(30) NULL,
+    cod_SI VARCHAR(10) NULL,
+    main_um INT NULL,
+    factor FLOAT NULL
+);
+timestamp: 2017-12-15T10:47:00.546000
+CREATE TABLE mod_um(
+    id INT IDENTITY PRIMARY KEY,
+    name VARCHAR(30) NULL,
+    cod_SI VARCHAR(10) NULL,
+    main_um INT NULL,
+    factor FLOAT NULL
+);
+timestamp: 2018-07-27T09:06:38.913000
+CREATE TABLE "mod_um"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(30) NULL,
+    "cod_SI" VARCHAR(10) NULL,
+    "main_um" INT NULL,
+    "factor" FLOAT NULL
+);
+timestamp: 2018-07-27T09:07:01.482000
+CREATE TABLE "mod_um"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(30) NULL,
+    "cod_SI" VARCHAR(10) NULL,
+    "main_um" INT NULL,
+    "factor" FLOAT NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:01.494000
+CREATE TABLE "mod_tipos"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_tipos_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_tipos" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "abreviatura" VARCHAR(50) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:01.502000
+CREATE TABLE "mod_grp_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_grp_atr_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_grp_atr" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:01.513000
+CREATE TABLE "mod_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL,
+    "clave" VARCHAR(20) NULL,
+    "um" INT NULL, CONSTRAINT "mod_atr_um__constraint" FOREIGN KEY ("um") REFERENCES "mod_um" ("id") ON DELETE CASCADE,
+    "grp_atr" INT NULL, CONSTRAINT "mod_atr_grp_atr__constraint" FOREIGN KEY ("grp_atr") REFERENCES "mod_grp_atr" ("id") ON DELETE CASCADE,
+    "tipo" VARCHAR(1) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "rango" VARCHAR(50) NULL,
+    "abreviatura" VARCHAR(10) NULL,
+    "orden_descripcion" INT NULL,
+    "visibilidad" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:01.523000
+CREATE TABLE "mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(200) NULL,
+    "name_fix" VARCHAR(200) NULL,
+    "tipo" INT NULL, CONSTRAINT "mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "um" INT NULL, CONSTRAINT "mod_um__constraint" FOREIGN KEY ("um") REFERENCES "mod_um" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2018-07-27T09:07:01.528000
+CREATE TABLE "mod_cmp"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_cmp_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cmp_tipo" VARCHAR(1) NULL,
+    "cmp_pie" INT NULL,
+    "cmp_mod" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:01.535000
+CREATE TABLE "mod_mod_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_mod_atr_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_mod_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES "mod_atr" ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:01.542000
+CREATE TABLE "mod_val"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "atr" INT NULL, CONSTRAINT "mod_val_atr__constraint" FOREIGN KEY ("atr") REFERENCES "mod_atr" ("id") ON DELETE CASCADE,
+    "valor" VARCHAR(50) NULL,
+    "name" VARCHAR(100) NULL,
+    "abreviatura" VARCHAR(15) NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:01.547000
+CREATE TABLE "mod_cfl"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:01.551000
+CREATE TABLE "mod_cfl_tip"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl" INT NULL, CONSTRAINT "mod_cfl_tip_cfl__constraint" FOREIGN KEY ("cfl") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE,
+    "mod_tipo" INT NULL, CONSTRAINT "mod_cfl_tip_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "min_mods" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:01.557000
+CREATE TABLE "mod_cfl_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl" INT NULL, CONSTRAINT "mod_cfl_atr_cfl__constraint" FOREIGN KEY ("cfl") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfl_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES "mod_atr" ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:01.565000
+CREATE TABLE "mod_cfg"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL,
+    "cfl_base" INT NULL, CONSTRAINT "mod_cfg_cfl_base__constraint" FOREIGN KEY ("cfl_base") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2018-07-27T09:07:01.569000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:01.576000
+CREATE TABLE "mod_cfg_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_atr_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES "mod_atr" ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:01.583000
+CREATE TABLE Presupuestos(
+    cod_pre INT IDENTITY PRIMARY KEY,
+    descri VARCHAR(50) NULL,
+    "fecha" DATE NULL,
+    NPresupuesto INT NULL,
+    "cfg" INT NULL, CONSTRAINT "Presupuestos_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2018-07-27T09:07:01.588000
+CREATE TABLE "mod_pre_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_atr_pre__constraint" FOREIGN KEY ("pre") REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_pre_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES "mod_atr" ("id") ON DELETE CASCADE,
+    "valor" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:03.737000
+CREATE TABLE "auth_user"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "first_name" VARCHAR(128) NULL,
+    "last_name" VARCHAR(128) NULL,
+    "email" VARCHAR(512) NULL,
+    "username" VARCHAR(128) NULL,
+    "password" VARCHAR(512) NULL,
+    "registration_key" VARCHAR(512) NULL,
+    "reset_password_key" VARCHAR(512) NULL,
+    "registration_id" VARCHAR(512) NULL,
+    "desactivado" BIT NULL,
+    "language_code" VARCHAR(5) NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:03.751000
+CREATE TABLE "auth_group"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "role" VARCHAR(512) NULL,
+    "description" VARCHAR(MAX) NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:03.761000
+CREATE TABLE "auth_membership"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "user_id" INT NULL, CONSTRAINT "auth_membership_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "group_id" INT NULL, CONSTRAINT "auth_membership_group_id__constraint" FOREIGN KEY ("group_id") REFERENCES "auth_group" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2018-07-27T09:07:03.771000
+CREATE TABLE "auth_permission"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "group_id" INT NULL, CONSTRAINT "auth_permission_group_id__constraint" FOREIGN KEY ("group_id") REFERENCES "auth_group" ("id") ON DELETE CASCADE,
+    "name" VARCHAR(512) NULL,
+    "table_name" VARCHAR(512) NULL,
+    "record_id" INT NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:03.782000
+CREATE TABLE "auth_event"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "time_stamp" DATETIME NULL,
+    "client_ip" VARCHAR(512) NULL,
+    "user_id" INT NULL, CONSTRAINT "auth_event_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "origin" VARCHAR(512) NULL,
+    "description" VARCHAR(MAX) NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:03.793000
+CREATE TABLE "auth_cas"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "user_id" INT NULL, CONSTRAINT "auth_cas_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "created_on" DATETIME NULL,
+    "service" VARCHAR(512) NULL,
+    "ticket" VARCHAR(512) NULL,
+    "renew" BIT NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:04.092000
+CREATE TABLE "mod_pre_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_mod_pre__constraint" FOREIGN KEY ("pre") REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_pre_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cantidad" INT NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:04.110000
+CREATE TABLE "scheduler_task"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "application_name" VARCHAR(512) NULL,
+    "task_name" VARCHAR(512) NULL,
+    "group_name" VARCHAR(512) NULL,
+    "status" VARCHAR(512) NULL,
+    "function_name" VARCHAR(512) NULL,
+    "uuid" VARCHAR(255) NULL UNIQUE,
+    "args" VARCHAR(MAX) NULL,
+    "vars" VARCHAR(MAX) NULL,
+    "enabled" BIT NULL,
+    "start_time" DATETIME NULL,
+    "next_run_time" DATETIME NULL,
+    "stop_time" DATETIME NULL,
+    "repeats" INT NULL,
+    "retry_failed" INT NULL,
+    "period" INT NULL,
+    "prevent_drift" BIT NULL,
+    "cronline" VARCHAR(512) NULL,
+    "timeout" INT NULL,
+    "sync_output" INT NULL,
+    "times_run" INT NULL,
+    "times_failed" INT NULL,
+    "last_run_time" DATETIME NULL,
+    "assigned_worker_name" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:04.130000
+CREATE TABLE "scheduler_run"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "task_id" INT NULL, CONSTRAINT "scheduler_run_task_id__constraint" FOREIGN KEY ("task_id") REFERENCES "scheduler_task" ("id") ON DELETE CASCADE,
+    "status" VARCHAR(512) NULL,
+    "start_time" DATETIME NULL,
+    "stop_time" DATETIME NULL,
+    "run_output" VARCHAR(MAX) NULL,
+    "run_result" VARCHAR(MAX) NULL,
+    "traceback" VARCHAR(MAX) NULL,
+    "worker_name" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:04.143000
+CREATE TABLE "scheduler_worker"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "worker_name" VARCHAR(255) NULL UNIQUE,
+    "first_heartbeat" DATETIME NULL,
+    "last_heartbeat" DATETIME NULL,
+    "status" VARCHAR(512) NULL,
+    "is_ticker" BIT NULL,
+    "group_names" VARCHAR(MAX) NULL,
+    "worker_stats" VARCHAR(MAX) NULL
+);
+faked!
+timestamp: 2018-07-27T09:07:04.156000
+CREATE TABLE "scheduler_task_deps"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "job_name" VARCHAR(512) NULL,
+    "task_parent" INT NULL,
+    "task_child" INT NULL, CONSTRAINT "scheduler_task_deps_task_child__constraint" FOREIGN KEY ("task_child") REFERENCES "scheduler_task" ("id") ON DELETE CASCADE,
+    "can_visit" BIT NULL
+);
+faked!
+timestamp: 2018-07-27T09:09:25.659000
+CREATE TABLE "scheduler_task"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "application_name" VARCHAR(512) NULL,
+    "task_name" VARCHAR(512) NULL,
+    "group_name" VARCHAR(512) NULL,
+    "status" VARCHAR(512) NULL,
+    "function_name" VARCHAR(512) NULL,
+    "uuid" VARCHAR(255) NULL UNIQUE,
+    "args" VARCHAR(MAX) NULL,
+    "vars" VARCHAR(MAX) NULL,
+    "enabled" BIT NULL,
+    "start_time" DATETIME NULL,
+    "next_run_time" DATETIME NULL,
+    "stop_time" DATETIME NULL,
+    "repeats" INT NULL,
+    "retry_failed" INT NULL,
+    "period" INT NULL,
+    "prevent_drift" BIT NULL,
+    "cronline" VARCHAR(512) NULL,
+    "timeout" INT NULL,
+    "sync_output" INT NULL,
+    "times_run" INT NULL,
+    "times_failed" INT NULL,
+    "last_run_time" DATETIME NULL,
+    "assigned_worker_name" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2018-07-27T09:09:25.680000
+CREATE TABLE "scheduler_run"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "task_id" INT NULL, CONSTRAINT "scheduler_run_task_id__constraint" FOREIGN KEY ("task_id") REFERENCES "scheduler_task" ("id") ON DELETE CASCADE,
+    "status" VARCHAR(512) NULL,
+    "start_time" DATETIME NULL,
+    "stop_time" DATETIME NULL,
+    "run_output" VARCHAR(MAX) NULL,
+    "run_result" VARCHAR(MAX) NULL,
+    "traceback" VARCHAR(MAX) NULL,
+    "worker_name" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2018-07-27T09:09:25.692000
+CREATE TABLE "scheduler_worker"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "worker_name" VARCHAR(255) NULL UNIQUE,
+    "first_heartbeat" DATETIME NULL,
+    "last_heartbeat" DATETIME NULL,
+    "status" VARCHAR(512) NULL,
+    "is_ticker" BIT NULL,
+    "group_names" VARCHAR(MAX) NULL,
+    "worker_stats" VARCHAR(MAX) NULL
+);
+faked!
+timestamp: 2018-07-27T09:09:25.705000
+CREATE TABLE "scheduler_task_deps"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "job_name" VARCHAR(512) NULL,
+    "task_parent" INT NULL,
+    "task_child" INT NULL, CONSTRAINT "scheduler_task_deps_task_child__constraint" FOREIGN KEY ("task_child") REFERENCES "scheduler_task" ("id") ON DELETE CASCADE,
+    "can_visit" BIT NULL
+);
+faked!
+timestamp: 2018-07-27T09:10:45.045000
+CREATE TABLE "scheduler_task"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "application_name" VARCHAR(512) NULL,
+    "task_name" VARCHAR(512) NULL,
+    "group_name" VARCHAR(512) NULL,
+    "status" VARCHAR(512) NULL,
+    "function_name" VARCHAR(512) NULL,
+    "uuid" VARCHAR(255) NULL UNIQUE,
+    "args" VARCHAR(MAX) NULL,
+    "vars" VARCHAR(MAX) NULL,
+    "enabled" BIT NULL,
+    "start_time" DATETIME NULL,
+    "next_run_time" DATETIME NULL,
+    "stop_time" DATETIME NULL,
+    "repeats" INT NULL,
+    "retry_failed" INT NULL,
+    "period" INT NULL,
+    "prevent_drift" BIT NULL,
+    "cronline" VARCHAR(512) NULL,
+    "timeout" INT NULL,
+    "sync_output" INT NULL,
+    "times_run" INT NULL,
+    "times_failed" INT NULL,
+    "last_run_time" DATETIME NULL,
+    "assigned_worker_name" VARCHAR(512) NULL
+);
+success!
+timestamp: 2018-07-27T09:11:03.787000
+CREATE TABLE "scheduler_run"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "task_id" INT NULL, CONSTRAINT "scheduler_run_task_id__constraint" FOREIGN KEY ("task_id") REFERENCES "scheduler_task" ("id") ON DELETE CASCADE,
+    "status" VARCHAR(512) NULL,
+    "start_time" DATETIME NULL,
+    "stop_time" DATETIME NULL,
+    "run_output" VARCHAR(MAX) NULL,
+    "run_result" VARCHAR(MAX) NULL,
+    "traceback" VARCHAR(MAX) NULL,
+    "worker_name" VARCHAR(512) NULL
+);
+success!
+timestamp: 2018-07-27T09:11:03.821000
+CREATE TABLE "scheduler_worker"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "worker_name" VARCHAR(255) NULL UNIQUE,
+    "first_heartbeat" DATETIME NULL,
+    "last_heartbeat" DATETIME NULL,
+    "status" VARCHAR(512) NULL,
+    "is_ticker" BIT NULL,
+    "group_names" VARCHAR(MAX) NULL,
+    "worker_stats" VARCHAR(MAX) NULL
+);
+success!
+timestamp: 2018-07-27T09:11:03.846000
+CREATE TABLE "scheduler_task_deps"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "job_name" VARCHAR(512) NULL,
+    "task_parent" INT NULL,
+    "task_child" INT NULL, CONSTRAINT "scheduler_task_deps_task_child__constraint" FOREIGN KEY ("task_child") REFERENCES "scheduler_task" ("id") ON DELETE CASCADE,
+    "can_visit" BIT NULL
+);
+success!
+timestamp: 2019-11-28T12:51:43.826000
+CREATE TABLE "mod_um"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(30) NULL,
+    "cod_SI" VARCHAR(10) NULL,
+    "main_um" INT NULL,
+    "factor" FLOAT NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.836000
+CREATE TABLE "mod_tipos"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_tipos_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_tipos" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "abreviatura" VARCHAR(50) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.844000
+CREATE TABLE "mod_grp_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_grp_atr_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_grp_atr" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.852000
+CREATE TABLE "mod_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL,
+    "clave" VARCHAR(20) NULL,
+    "um" INT NULL, CONSTRAINT "mod_atr_um__constraint" FOREIGN KEY ("um") REFERENCES "mod_um" ("id") ON DELETE CASCADE,
+    "grp_atr" INT NULL, CONSTRAINT "mod_atr_grp_atr__constraint" FOREIGN KEY ("grp_atr") REFERENCES "mod_grp_atr" ("id") ON DELETE CASCADE,
+    "tipo" VARCHAR(1) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "rango" VARCHAR(50) NULL,
+    "abreviatura" VARCHAR(10) NULL,
+    "orden_descripcion" INT NULL,
+    "visibilidad" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.862000
+CREATE TABLE "mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(200) NULL,
+    "name_fix" VARCHAR(200) NULL,
+    "tipo" INT NULL, CONSTRAINT "mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "um" INT NULL, CONSTRAINT "mod_um__constraint" FOREIGN KEY ("um") REFERENCES "mod_um" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2019-11-28T12:51:43.868000
+CREATE TABLE "mod_cmp"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_cmp_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cmp_tipo" VARCHAR(1) NULL,
+    "cmp_pie" INT NULL,
+    "cmp_mod" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.875000
+CREATE TABLE "mod_mod_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_mod_atr_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_mod_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES "mod_atr" ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.882000
+CREATE TABLE "mod_val"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "atr" INT NULL, CONSTRAINT "mod_val_atr__constraint" FOREIGN KEY ("atr") REFERENCES "mod_atr" ("id") ON DELETE CASCADE,
+    "valor" VARCHAR(50) NULL,
+    "name" VARCHAR(100) NULL,
+    "abreviatura" VARCHAR(15) NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.887000
+CREATE TABLE "mod_cfl"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.891000
+CREATE TABLE "mod_cfl_tip"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl" INT NULL, CONSTRAINT "mod_cfl_tip_cfl__constraint" FOREIGN KEY ("cfl") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE,
+    "mod_tipo" INT NULL, CONSTRAINT "mod_cfl_tip_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "min_mods" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.896000
+CREATE TABLE "mod_cfl_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl" INT NULL, CONSTRAINT "mod_cfl_atr_cfl__constraint" FOREIGN KEY ("cfl") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfl_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES "mod_atr" ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.904000
+CREATE TABLE "mod_cfg"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL,
+    "cfl_base" INT NULL, CONSTRAINT "mod_cfg_cfl_base__constraint" FOREIGN KEY ("cfl_base") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2019-11-28T12:51:43.908000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.914000
+CREATE TABLE "mod_cfg_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_atr_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES "mod_atr" ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.922000
+CREATE TABLE Presupuestos(
+    cod_pre INT IDENTITY PRIMARY KEY,
+    descri VARCHAR(50) NULL,
+    "fecha" DATE NULL,
+    NPresupuesto INT NULL,
+    "cfg" INT NULL, CONSTRAINT "Presupuestos_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2019-11-28T12:51:43.927000
+CREATE TABLE "mod_pre_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_atr_pre__constraint" FOREIGN KEY ("pre") REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_pre_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES "mod_atr" ("id") ON DELETE CASCADE,
+    "valor" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.941000
+CREATE TABLE "auth_user"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "first_name" VARCHAR(128) NULL,
+    "last_name" VARCHAR(128) NULL,
+    "email" VARCHAR(512) NULL,
+    "username" VARCHAR(128) NULL,
+    "password" VARCHAR(512) NULL,
+    "registration_key" VARCHAR(512) NULL,
+    "reset_password_key" VARCHAR(512) NULL,
+    "registration_id" VARCHAR(512) NULL,
+    "desactivado" BIT NULL,
+    "language_code" VARCHAR(5) NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.954000
+CREATE TABLE "auth_group"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "role" VARCHAR(512) NULL,
+    "description" VARCHAR(MAX) NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.964000
+CREATE TABLE "auth_membership"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "user_id" INT NULL, CONSTRAINT "auth_membership_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "group_id" INT NULL, CONSTRAINT "auth_membership_group_id__constraint" FOREIGN KEY ("group_id") REFERENCES "auth_group" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2019-11-28T12:51:43.973000
+CREATE TABLE "auth_permission"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "group_id" INT NULL, CONSTRAINT "auth_permission_group_id__constraint" FOREIGN KEY ("group_id") REFERENCES "auth_group" ("id") ON DELETE CASCADE,
+    "name" VARCHAR(512) NULL,
+    "table_name" VARCHAR(512) NULL,
+    "record_id" INT NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.984000
+CREATE TABLE "auth_event"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "time_stamp" DATETIME NULL,
+    "client_ip" VARCHAR(512) NULL,
+    "user_id" INT NULL, CONSTRAINT "auth_event_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "origin" VARCHAR(512) NULL,
+    "description" VARCHAR(MAX) NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:43.995000
+CREATE TABLE "auth_cas"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "user_id" INT NULL, CONSTRAINT "auth_cas_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "created_on" DATETIME NULL,
+    "service" VARCHAR(512) NULL,
+    "ticket" VARCHAR(512) NULL,
+    "renew" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T12:51:44.135000
+CREATE TABLE "mod_pre_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_mod_pre__constraint" FOREIGN KEY ("pre") REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_pre_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cantidad" INT NULL
+);
+faked!
+success!
+success!
+success!
+success!
+success!
+success!
+timestamp: 2019-11-28T13:40:12.715000
+CREATE TABLE "mod_tipos"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_tipos_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_tipos" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "abreviatura" VARCHAR(50) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:12.724000
+CREATE TABLE "mod_grp_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_grp_atr_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_grp_atr" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:12.734000
+CREATE TABLE "mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(200) NULL,
+    "name_fix" VARCHAR(200) NULL,
+    "tipo" INT NULL, CONSTRAINT "mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "um" INT NULL, CONSTRAINT "mod_um__constraint" FOREIGN KEY ("um") REFERENCES unidades ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2019-11-28T13:40:12.741000
+CREATE TABLE "mod_cmp"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_cmp_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cmp_tipo" VARCHAR(1) NULL,
+    "cmp_pie" INT NULL,
+    "cmp_mod" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:12.748000
+CREATE TABLE "mod_mod_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_mod_atr_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_mod_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:12.756000
+CREATE TABLE "mod_cfl"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:12.760000
+CREATE TABLE "mod_cfl_tip"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl" INT NULL, CONSTRAINT "mod_cfl_tip_cfl__constraint" FOREIGN KEY ("cfl") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE,
+    "mod_tipo" INT NULL, CONSTRAINT "mod_cfl_tip_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "min_mods" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:12.765000
+CREATE TABLE "mod_cfl_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl" INT NULL, CONSTRAINT "mod_cfl_atr_cfl__constraint" FOREIGN KEY ("cfl") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfl_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:12.772000
+CREATE TABLE "mod_cfg"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL,
+    "cfl_base" INT NULL, CONSTRAINT "mod_cfg_cfl_base__constraint" FOREIGN KEY ("cfl_base") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2019-11-28T13:40:12.777000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:12.783000
+CREATE TABLE "mod_cfg_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_atr_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:12.800000
+CREATE TABLE Presupuestos(
+    cod_pre INT IDENTITY PRIMARY KEY,
+    descri VARCHAR(50) NULL,
+    "fecha" DATE NULL,
+    NPresupuesto INT NULL,
+    "cfg" INT NULL, CONSTRAINT "Presupuestos_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2019-11-28T13:40:12.806000
+CREATE TABLE "mod_pre_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_atr_pre__constraint" FOREIGN KEY ("pre") REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_pre_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valor" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:43.866000
+CREATE TABLE "mod_tipos"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_tipos_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_tipos" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "abreviatura" VARCHAR(50) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:43.888000
+CREATE TABLE "mod_grp_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_grp_atr_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_grp_atr" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:43.903000
+CREATE TABLE "mod_cmp"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_cmp_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cmp_tipo" VARCHAR(1) NULL,
+    "cmp_pie" INT NULL,
+    "cmp_mod" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:43.910000
+CREATE TABLE "mod_mod_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_mod_atr_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_mod_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:43.918000
+CREATE TABLE "mod_cfl"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:43.923000
+CREATE TABLE "mod_cfl_tip"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl" INT NULL, CONSTRAINT "mod_cfl_tip_cfl__constraint" FOREIGN KEY ("cfl") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE,
+    "mod_tipo" INT NULL, CONSTRAINT "mod_cfl_tip_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "min_mods" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:43.930000
+CREATE TABLE "mod_cfl_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl" INT NULL, CONSTRAINT "mod_cfl_atr_cfl__constraint" FOREIGN KEY ("cfl") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfl_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:43.940000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:43.946000
+CREATE TABLE "mod_cfg_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_atr_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:43.954000
+CREATE TABLE Presupuestos(
+    cod_pre INT IDENTITY PRIMARY KEY,
+    descri VARCHAR(50) NULL,
+    "fecha" DATE NULL,
+    NPresupuesto INT NULL,
+    "cfg" INT NULL, CONSTRAINT "Presupuestos_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2019-11-28T13:40:43.960000
+CREATE TABLE "mod_pre_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_atr_pre__constraint" FOREIGN KEY ("pre") REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_pre_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valor" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2019-11-28T13:40:44.149000
+CREATE TABLE "mod_pre_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_mod_pre__constraint" FOREIGN KEY ("pre") REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_pre_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cantidad" INT NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:03.022000
+CREATE TABLE "mod_tipos"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_tipos_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_tipos" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "abreviatura" VARCHAR(50) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:03.031000
+CREATE TABLE "mod_grp_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_grp_atr_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_grp_atr" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:03.041000
+CREATE TABLE "mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(200) NULL,
+    "name_fix" VARCHAR(200) NULL,
+    "tipo" INT NULL, CONSTRAINT "mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "um" INT NULL, CONSTRAINT "mod_um__constraint" FOREIGN KEY ("um") REFERENCES unidades ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2019-11-28T13:41:03.048000
+CREATE TABLE "mod_cmp"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_cmp_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cmp_tipo" VARCHAR(1) NULL,
+    "cmp_pie" INT NULL,
+    "cmp_mod" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:03.056000
+CREATE TABLE "mod_mod_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_mod_atr_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_mod_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:03.064000
+CREATE TABLE "mod_cfl"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:03.068000
+CREATE TABLE "mod_cfl_tip"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl" INT NULL, CONSTRAINT "mod_cfl_tip_cfl__constraint" FOREIGN KEY ("cfl") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE,
+    "mod_tipo" INT NULL, CONSTRAINT "mod_cfl_tip_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "min_mods" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:03.074000
+CREATE TABLE "mod_cfl_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl" INT NULL, CONSTRAINT "mod_cfl_atr_cfl__constraint" FOREIGN KEY ("cfl") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfl_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:03.082000
+CREATE TABLE "mod_cfg"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL,
+    "cfl_base" INT NULL, CONSTRAINT "mod_cfg_cfl_base__constraint" FOREIGN KEY ("cfl_base") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2019-11-28T13:41:03.088000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:03.094000
+CREATE TABLE "mod_cfg_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_atr_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:03.102000
+CREATE TABLE Presupuestos(
+    cod_pre INT IDENTITY PRIMARY KEY,
+    descri VARCHAR(50) NULL,
+    "fecha" DATE NULL,
+    NPresupuesto INT NULL,
+    "cfg" INT NULL, CONSTRAINT "Presupuestos_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2019-11-28T13:41:03.108000
+CREATE TABLE "mod_pre_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_atr_pre__constraint" FOREIGN KEY ("pre") REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_pre_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valor" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:43.939000
+CREATE TABLE "auth_user"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "first_name" VARCHAR(128) NULL,
+    "last_name" VARCHAR(128) NULL,
+    "email" VARCHAR(512) NULL,
+    "username" VARCHAR(128) NULL,
+    "password" VARCHAR(512) NULL,
+    "registration_key" VARCHAR(512) NULL,
+    "reset_password_key" VARCHAR(512) NULL,
+    "registration_id" VARCHAR(512) NULL,
+    "desactivado" BIT NULL,
+    "language_code" VARCHAR(5) NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:43.953000
+CREATE TABLE "auth_group"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "role" VARCHAR(512) NULL,
+    "description" VARCHAR(MAX) NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:43.963000
+CREATE TABLE "auth_membership"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "user_id" INT NULL, CONSTRAINT "auth_membership_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "group_id" INT NULL, CONSTRAINT "auth_membership_group_id__constraint" FOREIGN KEY ("group_id") REFERENCES "auth_group" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2019-11-28T13:41:43.973000
+CREATE TABLE "auth_permission"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "group_id" INT NULL, CONSTRAINT "auth_permission_group_id__constraint" FOREIGN KEY ("group_id") REFERENCES "auth_group" ("id") ON DELETE CASCADE,
+    "name" VARCHAR(512) NULL,
+    "table_name" VARCHAR(512) NULL,
+    "record_id" INT NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:43.984000
+CREATE TABLE "auth_event"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "time_stamp" DATETIME NULL,
+    "client_ip" VARCHAR(512) NULL,
+    "user_id" INT NULL, CONSTRAINT "auth_event_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "origin" VARCHAR(512) NULL,
+    "description" VARCHAR(MAX) NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:43.995000
+CREATE TABLE "auth_cas"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "user_id" INT NULL, CONSTRAINT "auth_cas_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "created_on" DATETIME NULL,
+    "service" VARCHAR(512) NULL,
+    "ticket" VARCHAR(512) NULL,
+    "renew" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T13:41:44.127000
+CREATE TABLE "mod_pre_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_mod_pre__constraint" FOREIGN KEY ("pre") REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_pre_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cantidad" INT NULL
+);
+faked!
+timestamp: 2019-11-28T13:58:23.733000
+CREATE TABLE "mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(200) NULL,
+    "name_fix" VARCHAR(200) NULL,
+    "tipo" INT NULL, CONSTRAINT "mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "um" INT NULL, CONSTRAINT "mod_um__constraint" FOREIGN KEY ("um") REFERENCES unidades ("id") ON DELETE CASCADE
+);
+timestamp: 2019-11-28T13:58:37.099000
+CREATE TABLE "mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(200) NULL,
+    "name_fix" VARCHAR(200) NULL,
+    "tipo" INT NULL, CONSTRAINT "mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "um" INT NULL, CONSTRAINT "mod_um__constraint" FOREIGN KEY ("um") REFERENCES unidades ("id") ON DELETE CASCADE
+);
+timestamp: 2019-11-28T13:58:44.682000
+CREATE TABLE "mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(200) NULL,
+    "name_fix" VARCHAR(200) NULL,
+    "tipo" INT NULL, CONSTRAINT "mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "um" INT NULL, CONSTRAINT "mod_um__constraint" FOREIGN KEY ("um") REFERENCES unidades ("id") ON DELETE CASCADE
+);
+timestamp: 2019-11-28T13:59:23.749000
+CREATE TABLE "mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(200) NULL,
+    "name_fix" VARCHAR(200) NULL,
+    "tipo" INT NULL, CONSTRAINT "mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "um" INT NULL, CONSTRAINT "mod_um__constraint" FOREIGN KEY ("um") REFERENCES unidades ("id") ON DELETE CASCADE
+);
+timestamp: 2019-11-28T13:59:44.659000
+CREATE TABLE "mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(200) NULL,
+    "name_fix" VARCHAR(200) NULL,
+    "tipo" INT NULL, CONSTRAINT "mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "um" INT NULL, CONSTRAINT "mod_um__constraint" FOREIGN KEY ("um") REFERENCES unidades ("id") ON DELETE CASCADE
+);
+success!
+timestamp: 2019-11-28T13:59:44.708000
+CREATE TABLE "mod_cmp"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_cmp_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cmp_tipo" VARCHAR(1) NULL,
+    "cmp_pie" INT NULL,
+    "cmp_mod" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+success!
+timestamp: 2019-11-28T13:59:44.747000
+CREATE TABLE "mod_mod_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_mod_atr_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_mod_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+success!
+timestamp: 2019-11-28T13:59:44.765000
+CREATE TABLE "mod_cfl_tip"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl" INT NULL, CONSTRAINT "mod_cfl_tip_cfl__constraint" FOREIGN KEY ("cfl") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE,
+    "mod_tipo" INT NULL, CONSTRAINT "mod_cfl_tip_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "min_mods" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+success!
+timestamp: 2019-11-28T13:59:44.776000
+CREATE TABLE "mod_cfl_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl" INT NULL, CONSTRAINT "mod_cfl_atr_cfl__constraint" FOREIGN KEY ("cfl") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfl_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+success!
+timestamp: 2019-11-28T13:59:44.789000
+CREATE TABLE "mod_cfg"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL,
+    "cfl_base" INT NULL, CONSTRAINT "mod_cfg_cfl_base__constraint" FOREIGN KEY ("cfl_base") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE
+);
+success!
+timestamp: 2019-11-28T13:59:44.798000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+timestamp: 2019-11-28T13:59:44.920000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+timestamp: 2019-11-28T14:00:05.283000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-11-28T14:00:05.289000
+CREATE TABLE "mod_cfg_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_atr_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T14:00:05.297000
+CREATE TABLE Presupuestos(
+    cod_pre INT IDENTITY PRIMARY KEY,
+    descri VARCHAR(50) NULL,
+    "fecha" DATE NULL,
+    NPresupuesto INT NULL,
+    "cfg" INT NULL, CONSTRAINT "Presupuestos_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2019-11-28T14:00:05.303000
+CREATE TABLE "mod_pre_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_atr_pre__constraint" FOREIGN KEY ("pre") REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_pre_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valor" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2019-11-28T14:00:44.948000
+CREATE TABLE "mod_pre_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_mod_pre__constraint" FOREIGN KEY ("pre") REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_pre_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cantidad" INT NULL
+);
+faked!
+timestamp: 2019-11-28T16:42:44.911000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-11-28T16:42:44.923000
+CREATE TABLE "mod_pre_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_atr_pre__constraint" FOREIGN KEY ("pre") REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_pre_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valor" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2019-11-28T16:42:45.115000
+CREATE TABLE "mod_pre_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_mod_pre__constraint" FOREIGN KEY ("pre") REFERENCES Presupuestos (cod_pre) ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_pre_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cantidad" INT NULL
+);
+faked!
+timestamp: 2019-11-28T16:42:54.516000
+CREATE TABLE "mod_cfg_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_atr_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2019-11-28T16:47:20.055000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+timestamp: 2019-11-28T16:47:44.880000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+timestamp: 2019-11-28T16:48:07.997000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+timestamp: 2019-11-28T16:48:38.726000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+timestamp: 2019-11-28T16:48:44.809000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+timestamp: 2019-11-28T16:49:01.115000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+timestamp: 2019-11-28T16:49:08.811000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+timestamp: 2019-11-28T16:49:19.200000
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2019-12-19T15:02:16.833000
+CREATE TABLE "mod_rul"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL,
+    "filtro_descripcion" VARCHAR(200) NULL
+);
+success!
+timestamp: 2019-12-19T15:02:16.867000
+CREATE TABLE "mod_rul_lin"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod_rul" INT NULL, CONSTRAINT "mod_rul_lin_mod_rul__constraint" FOREIGN KEY ("mod_rul") REFERENCES "mod_rul" ("id") ON DELETE CASCADE,
+    "cmp_pie_trg" INT NULL,
+    "cmp_pie_tar" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+success!
+timestamp: 2019-12-19T15:37:51.587000
+ALTER TABLE "mod_rul_lin" ADD "orden" INT NULL;
+faked!
+timestamp: 2019-12-19T15:37:51.592000
+ALTER TABLE "mod_rul_lin" ADD "formula_trg" VARCHAR(512) NULL;
+faked!
+timestamp: 2019-12-19T15:37:51.593000
+ALTER TABLE "mod_rul_lin" ADD "formula_tar" VARCHAR(512) NULL;
+faked!
+timestamp: 2019-12-19T15:37:51.606000
+ALTER TABLE "mod_rul_lin" DROP COLUMN "formula";
+faked!
+success!
+timestamp: 2020-01-07T14:51:11.533000
+CREATE TABLE "mod_tipos2"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_tipos2_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_tipos2" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL
+);
+success!
+timestamp: 2020-01-07T14:54:32.635000
+ALTER TABLE "mod_tipos2" ADD "name" VARCHAR(512) NULL;
+timestamp: 2020-01-07T14:54:32.646000
+ALTER TABLE "mod_tipos2" ADD "abreviatura" VARCHAR(50) NULL;
+timestamp: 2020-01-07T14:54:32.653000
+ALTER TABLE "mod_tipos2" ADD "node_type" VARCHAR(512) NULL;
+timestamp: 2020-01-07T14:54:32.660000
+ALTER TABLE "mod_tipos2" ADD "created_on" DATETIME NULL;
+success!
+timestamp: 2020-01-07T14:54:32.693000
+ALTER TABLE "mod" ADD "tipo2" INT NULL; ALTER TABLE "mod" ADD CONSTRAINT "mod_tipo2__constraint" FOREIGN KEY ("tipo2") REFERENCES "mod_tipos2" ("id") ON DELETE CASCADE;
+success!
+success!
+timestamp: 2020-01-22T15:32:31.656000
+ALTER TABLE "mod_pre_atr" ADD "tag" BIT NULL;
+success!
+timestamp: 2020-01-23T13:14:33.659000
+CREATE TABLE "mod_pre_nav"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_nav_pre__constraint" FOREIGN KEY ("pre") REFERENCES "mod_pre" ("id") ON DELETE CASCADE,
+    "posx" INT NULL,
+    "posy" FLOAT NULL,
+    "anchonave" INT NULL, CONSTRAINT "mod_pre_nav_anchonave__constraint" FOREIGN KEY ("anchonave") REFERENCES proatr_val ("id") ON DELETE CASCADE,
+    "unidades" INT NULL,
+    "longitud" FLOAT NULL
+);
+timestamp: 2020-01-23T13:15:15.674000
+CREATE TABLE "mod_pre_nav"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_nav_pre__constraint" FOREIGN KEY ("pre") REFERENCES "mod_pre" ("id") ON DELETE CASCADE,
+    "posx" INT NULL,
+    "posy" FLOAT NULL,
+    "anchonave" INT NULL, CONSTRAINT "mod_pre_nav_anchonave__constraint" FOREIGN KEY ("anchonave") REFERENCES proatr_val ("id") ON DELETE CASCADE,
+    "unidades" INT NULL,
+    "longitud" FLOAT NULL
+);
+timestamp: 2020-01-23T13:15:18.004000
+CREATE TABLE "mod_pre_nav"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_nav_pre__constraint" FOREIGN KEY ("pre") REFERENCES "mod_pre" ("id") ON DELETE CASCADE,
+    "posx" INT NULL,
+    "posy" FLOAT NULL,
+    "anchonave" INT NULL, CONSTRAINT "mod_pre_nav_anchonave__constraint" FOREIGN KEY ("anchonave") REFERENCES proatr_val ("id") ON DELETE CASCADE,
+    "unidades" INT NULL,
+    "longitud" FLOAT NULL
+);
+timestamp: 2020-01-23T13:17:00.186000
+CREATE TABLE "mod_pre_nav"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_nav_pre__constraint" FOREIGN KEY ("pre") REFERENCES "mod_pre" ("id") ON DELETE CASCADE,
+    "posx" INT NULL,
+    "posy" FLOAT NULL,
+    "anchonave" INT NULL, CONSTRAINT "mod_pre_nav_anchonave__constraint" FOREIGN KEY ("anchonave") REFERENCES proatr_val ("id") ON DELETE CASCADE,
+    "unidades" INT NULL,
+    "longitud" FLOAT NULL
+);
+timestamp: 2020-01-23T13:17:04.061000
+CREATE TABLE "mod_pre_nav"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_nav_pre__constraint" FOREIGN KEY ("pre") REFERENCES "mod_pre" ("id") ON DELETE CASCADE,
+    "posx" INT NULL,
+    "posy" FLOAT NULL,
+    "anchonave" INT NULL, CONSTRAINT "mod_pre_nav_anchonave__constraint" FOREIGN KEY ("anchonave") REFERENCES proatr_val ("id") ON DELETE CASCADE,
+    "unidades" INT NULL,
+    "longitud" FLOAT NULL
+);
+timestamp: 2020-01-23T13:17:56.267000
+CREATE TABLE "mod_pre_nav"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL,
+    "posx" INT NULL,
+    "posy" FLOAT NULL,
+    "anchonave" INT NULL, CONSTRAINT "mod_pre_nav_anchonave__constraint" FOREIGN KEY ("anchonave") REFERENCES proatr_val ("id") ON DELETE CASCADE,
+    "unidades" INT NULL,
+    "longitud" FLOAT NULL
+);
+success!
+timestamp: 2020-02-19T13:44:27.767000
+ALTER TABLE "mod_pre_nav" ADD "cfg" INT NULL; ALTER TABLE "mod_pre_nav" ADD CONSTRAINT "mod_pre_nav_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE;
+success!
+timestamp: 2020-02-20T13:00:52.866000
+ALTER TABLE "mod" ADD "ubicaciones" VARCHAR(MAX) NULL;
+success!
+timestamp: 2020-02-20T15:05:00.099000
+ALTER TABLE "mod" ADD "tipo__tmp" VARCHAR(MAX) NULL;
+UPDATE "mod" SET "tipo__tmp"="tipo";
+ALTER TABLE "mod" DROP COLUMN "tipo";
+timestamp: 2020-02-20T15:06:31.254000
+ALTER TABLE "mod" ADD "tipo__tmp" VARCHAR(MAX) NULL;
+UPDATE "mod" SET "tipo__tmp"="tipo";
+ALTER TABLE "mod" DROP COLUMN "tipo";
+timestamp: 2020-02-20T15:07:06.192000
+ALTER TABLE "mod" ADD "tipo__tmp" VARCHAR(MAX) NULL;
+UPDATE "mod" SET "tipo__tmp"="tipo";
+ALTER TABLE "mod" DROP COLUMN "tipo";
+timestamp: 2020-02-20T15:07:14.303000
+ALTER TABLE "mod" ADD "tipo__tmp" VARCHAR(MAX) NULL;
+UPDATE "mod" SET "tipo__tmp"="tipo";
+ALTER TABLE "mod" DROP COLUMN "tipo";
+ALTER TABLE "mod" ADD "tipo" VARCHAR(MAX) NULL;
+UPDATE "mod" SET "tipo"="tipo__tmp";
+ALTER TABLE "mod" DROP COLUMN "tipo__tmp";
+timestamp: 2020-02-20T15:07:14.385000
+ALTER TABLE "mod" DROP COLUMN "ubicaciones";
+success!
+timestamp: 2020-04-09T14:57:04.097926
+CREATE TABLE "mod_pie_fin"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_pie_fin_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cmp_pie" INT NULL, CONSTRAINT "mod_pie_fin_cmp_pie__constraint" FOREIGN KEY ("cmp_pie") REFERENCES "productos" (id_pieza) ON DELETE CASCADE,
+    "cantidad" FLOAT NULL,
+    "formula" VARCHAR(512) NULL,
+    "nivel" INT NULL
+);
+success!
+success!
+timestamp: 2020-04-27T16:16:43.215697
+ALTER TABLE "mod_cfg_mod" DROP COLUMN "tipo";
+success!
+timestamp: 2020-04-27T16:16:51.931106
+CREATE TABLE "auth_user"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "first_name" VARCHAR(128) NULL,
+    "last_name" VARCHAR(128) NULL,
+    "email" VARCHAR(512) NULL,
+    "username" VARCHAR(128) NULL,
+    "password" VARCHAR(512) NULL,
+    "registration_key" VARCHAR(512) NULL,
+    "reset_password_key" VARCHAR(512) NULL,
+    "registration_id" VARCHAR(512) NULL,
+    "desactivado" BIT NULL,
+    "language_code" VARCHAR(5) NULL
+);
+timestamp: 2020-04-27T16:16:56.084703
+CREATE TABLE "auth_user"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "first_name" VARCHAR(128) NULL,
+    "last_name" VARCHAR(128) NULL,
+    "email" VARCHAR(512) NULL,
+    "username" VARCHAR(128) NULL,
+    "password" VARCHAR(512) NULL,
+    "registration_key" VARCHAR(512) NULL,
+    "reset_password_key" VARCHAR(512) NULL,
+    "registration_id" VARCHAR(512) NULL,
+    "desactivado" BIT NULL,
+    "language_code" VARCHAR(5) NULL
+);
+timestamp: 2020-04-29T09:45:26.609028
+CREATE TABLE "auth_user"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "first_name" VARCHAR(128) NULL,
+    "last_name" VARCHAR(128) NULL,
+    "email" VARCHAR(512) NULL,
+    "username" VARCHAR(128) NULL,
+    "password" VARCHAR(512) NULL,
+    "registration_key" VARCHAR(512) NULL,
+    "reset_password_key" VARCHAR(512) NULL,
+    "registration_id" VARCHAR(512) NULL,
+    "desactivado" BIT NULL,
+    "language_code" VARCHAR(5) NULL
+);
+timestamp: 2020-04-29T09:48:07.128891
+CREATE TABLE "auth_user"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "first_name" VARCHAR(128) NULL,
+    "last_name" VARCHAR(128) NULL,
+    "email" VARCHAR(512) NULL,
+    "username" VARCHAR(128) NULL,
+    "password" VARCHAR(512) NULL,
+    "registration_key" VARCHAR(512) NULL,
+    "reset_password_key" VARCHAR(512) NULL,
+    "registration_id" VARCHAR(512) NULL,
+    "desactivado" BIT NULL,
+    "language_code" VARCHAR(5) NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.140216
+CREATE TABLE "auth_group"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "role" VARCHAR(512) NULL,
+    "description" VARCHAR(MAX) NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.144700
+CREATE TABLE "auth_membership"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "user_id" INT NULL, CONSTRAINT "auth_membership_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "group_id" INT NULL, CONSTRAINT "auth_membership_group_id__constraint" FOREIGN KEY ("group_id") REFERENCES "auth_group" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2020-04-29T09:48:07.148984
+CREATE TABLE "auth_permission"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "group_id" INT NULL, CONSTRAINT "auth_permission_group_id__constraint" FOREIGN KEY ("group_id") REFERENCES "auth_group" ("id") ON DELETE CASCADE,
+    "name" VARCHAR(512) NULL,
+    "table_name" VARCHAR(512) NULL,
+    "record_id" INT NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.154989
+CREATE TABLE "auth_event"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "time_stamp" DATETIME NULL,
+    "client_ip" VARCHAR(512) NULL,
+    "user_id" INT NULL, CONSTRAINT "auth_event_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "origin" VARCHAR(512) NULL,
+    "description" VARCHAR(MAX) NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.161243
+CREATE TABLE "auth_cas"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "user_id" INT NULL, CONSTRAINT "auth_cas_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "created_on" DATETIME NULL,
+    "service" VARCHAR(512) NULL,
+    "ticket" VARCHAR(512) NULL,
+    "renew" BIT NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.171683
+CREATE TABLE "mod_tipos"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_tipos_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_tipos" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "abreviatura" VARCHAR(50) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.180981
+CREATE TABLE "mod_tipos2"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_tipos2_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_tipos2" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "abreviatura" VARCHAR(50) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.190245
+CREATE TABLE "mod_grp_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_grp_atr_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_grp_atr" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.205900
+CREATE TABLE "mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(200) NULL,
+    "name_fix" VARCHAR(200) NULL,
+    "tipo" VARCHAR(MAX) NULL,
+    "tipo2" INT NULL, CONSTRAINT "mod_tipo2__constraint" FOREIGN KEY ("tipo2") REFERENCES "mod_tipos2" ("id") ON DELETE CASCADE,
+    "um" INT NULL, CONSTRAINT "mod_um__constraint" FOREIGN KEY ("um") REFERENCES unidades ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2020-04-29T09:48:07.213113
+CREATE TABLE "mod_cmp"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_cmp_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cmp_tipo" VARCHAR(1) NULL,
+    "cmp_pie" INT NULL,
+    "cmp_mod" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.221661
+CREATE TABLE "mod_pie_fin"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_pie_fin_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cmp_pie" INT NULL, CONSTRAINT "mod_pie_fin_cmp_pie__constraint" FOREIGN KEY ("cmp_pie") REFERENCES "productos" (id_pieza) ON DELETE CASCADE,
+    "cantidad" FLOAT NULL,
+    "formula" VARCHAR(512) NULL,
+    "nivel" INT NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.228641
+CREATE TABLE "mod_rul"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL,
+    "filtro_descripcion" VARCHAR(200) NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.233357
+CREATE TABLE "mod_rul_lin"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod_rul" INT NULL, CONSTRAINT "mod_rul_lin_mod_rul__constraint" FOREIGN KEY ("mod_rul") REFERENCES "mod_rul" ("id") ON DELETE CASCADE,
+    "orden" INT NULL,
+    "cmp_pie_trg" INT NULL,
+    "formula_trg" VARCHAR(512) NULL,
+    "cmp_pie_tar" INT NULL,
+    "formula_tar" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.241535
+CREATE TABLE "mod_mod_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_mod_atr_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_mod_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.428254
+CREATE TABLE "mod_cfl"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.434268
+CREATE TABLE "mod_cfl_tip"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl" INT NULL, CONSTRAINT "mod_cfl_tip_cfl__constraint" FOREIGN KEY ("cfl") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE,
+    "mod_tipo" INT NULL, CONSTRAINT "mod_cfl_tip_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "min_mods" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.441889
+CREATE TABLE "mod_cfl_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl" INT NULL, CONSTRAINT "mod_cfl_atr_cfl__constraint" FOREIGN KEY ("cfl") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfl_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.533386
+CREATE TABLE "mod_cfl_tip_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl_tip" INT NULL, CONSTRAINT "mod_cfl_tip_atr_cfl_tip__constraint" FOREIGN KEY ("cfl_tip") REFERENCES "mod_cfl_tip" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfl_tip_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.615360
+CREATE TABLE "mod_cfg"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL,
+    "cfl_base" INT NULL, CONSTRAINT "mod_cfg_cfl_base__constraint" FOREIGN KEY ("cfl_base") REFERENCES "mod_cfl" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2020-04-29T09:48:07.621593
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2020-04-29T09:48:07.628571
+CREATE TABLE "mod_cfg_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_atr_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.714520
+CREATE TABLE "mod_pre_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_mod_pre__constraint" FOREIGN KEY ("pre") REFERENCES "mod_pre" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_pre_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cantidad" INT NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.721556
+CREATE TABLE "mod_pre_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_atr_pre__constraint" FOREIGN KEY ("pre") REFERENCES "mod_pre" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_pre_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valor" VARCHAR(100) NULL,
+    "tag" BIT NULL
+);
+faked!
+timestamp: 2020-04-29T09:48:07.727760
+CREATE TABLE "mod_pre_nav"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL,
+    "posx" INT NULL,
+    "posy" FLOAT NULL,
+    "cfg" INT NULL, CONSTRAINT "mod_pre_nav_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "anchonave" INT NULL, CONSTRAINT "mod_pre_nav_anchonave__constraint" FOREIGN KEY ("anchonave") REFERENCES proatr_val ("id") ON DELETE CASCADE,
+    "unidades" INT NULL,
+    "longitud" FLOAT NULL
+);
+faked!
+timestamp: 2020-04-29T09:51:33.005895
+CREATE TABLE "mod_cfl_tip_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfl_tip" INT NULL, CONSTRAINT "mod_cfl_tip_atr_cfl_tip__constraint" FOREIGN KEY ("cfl_tip") REFERENCES "mod_cfl_tip" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfl_tip_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+success!
+timestamp: 2020-04-29T09:51:33.220900
+ALTER TABLE "mod_cfg_mod" ADD "tipo" INT NULL; ALTER TABLE "mod_cfg_mod" ADD CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE;
+timestamp: 2020-04-29T09:52:33.116384
+ALTER TABLE "mod_cfg_mod" ADD "tipo" INT NULL; ALTER TABLE "mod_cfg_mod" ADD CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE;
+faked!
+success!
+success!
+timestamp: 2020-04-30T17:05:52.849591
+CREATE TABLE "mod_cfg_tip"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_tip_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "mod_tipo" INT NULL, CONSTRAINT "mod_cfg_tip_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "min_mods" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2020-04-30T17:05:53.100752
+CREATE TABLE "mod_cfg_tip_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg_tip" INT NULL, CONSTRAINT "mod_cfg_tip_atr_cfg_tip__constraint" FOREIGN KEY ("cfg_tip") REFERENCES "mod_cfg_tip" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_tip_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2020-04-30T17:10:16.859595
+CREATE TABLE "mod_cfg_tip"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_tip_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "mod_tipo" INT NULL, CONSTRAINT "mod_cfg_tip_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "min_mods" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2020-04-30T17:10:16.942675
+CREATE TABLE "mod_cfg_tip_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg_tip" INT NULL, CONSTRAINT "mod_cfg_tip_atr_cfg_tip__constraint" FOREIGN KEY ("cfg_tip") REFERENCES "mod_cfg_tip" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_tip_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:00.346463
+CREATE TABLE "auth_user"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "first_name" VARCHAR(128) NULL,
+    "last_name" VARCHAR(128) NULL,
+    "email" VARCHAR(512) NULL,
+    "username" VARCHAR(128) NULL,
+    "password" VARCHAR(512) NULL,
+    "registration_key" VARCHAR(512) NULL,
+    "reset_password_key" VARCHAR(512) NULL,
+    "registration_id" VARCHAR(512) NULL,
+    "desactivado" BIT NULL,
+    "language_code" VARCHAR(5) NULL
+);
+timestamp: 2020-04-30T17:15:06.144894
+CREATE TABLE "auth_user"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "first_name" VARCHAR(128) NULL,
+    "last_name" VARCHAR(128) NULL,
+    "email" VARCHAR(512) NULL,
+    "username" VARCHAR(128) NULL,
+    "password" VARCHAR(512) NULL,
+    "registration_key" VARCHAR(512) NULL,
+    "reset_password_key" VARCHAR(512) NULL,
+    "registration_id" VARCHAR(512) NULL,
+    "desactivado" BIT NULL,
+    "language_code" VARCHAR(5) NULL
+);
+timestamp: 2020-04-30T17:15:35.322801
+CREATE TABLE "auth_user"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "first_name" VARCHAR(128) NULL,
+    "last_name" VARCHAR(128) NULL,
+    "email" VARCHAR(512) NULL,
+    "username" VARCHAR(128) NULL,
+    "password" VARCHAR(512) NULL,
+    "registration_key" VARCHAR(512) NULL,
+    "reset_password_key" VARCHAR(512) NULL,
+    "registration_id" VARCHAR(512) NULL,
+    "desactivado" BIT NULL,
+    "language_code" VARCHAR(5) NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:35.332431
+CREATE TABLE "auth_group"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "role" VARCHAR(512) NULL,
+    "description" VARCHAR(MAX) NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:35.337027
+CREATE TABLE "auth_membership"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "user_id" INT NULL, CONSTRAINT "auth_membership_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "group_id" INT NULL, CONSTRAINT "auth_membership_group_id__constraint" FOREIGN KEY ("group_id") REFERENCES "auth_group" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2020-04-30T17:15:35.342225
+CREATE TABLE "auth_permission"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "group_id" INT NULL, CONSTRAINT "auth_permission_group_id__constraint" FOREIGN KEY ("group_id") REFERENCES "auth_group" ("id") ON DELETE CASCADE,
+    "name" VARCHAR(512) NULL,
+    "table_name" VARCHAR(512) NULL,
+    "record_id" INT NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:35.348516
+CREATE TABLE "auth_event"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "time_stamp" DATETIME NULL,
+    "client_ip" VARCHAR(512) NULL,
+    "user_id" INT NULL, CONSTRAINT "auth_event_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "origin" VARCHAR(512) NULL,
+    "description" VARCHAR(MAX) NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:35.355309
+CREATE TABLE "auth_cas"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "user_id" INT NULL, CONSTRAINT "auth_cas_user_id__constraint" FOREIGN KEY ("user_id") REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "created_on" DATETIME NULL,
+    "service" VARCHAR(512) NULL,
+    "ticket" VARCHAR(512) NULL,
+    "renew" BIT NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:35.366637
+CREATE TABLE "mod_tipos"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_tipos_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_tipos" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "abreviatura" VARCHAR(50) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:35.379199
+CREATE TABLE "mod_tipos2"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_tipos2_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_tipos2" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "abreviatura" VARCHAR(50) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:35.389000
+CREATE TABLE "mod_grp_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "parent" INT NULL, CONSTRAINT "mod_grp_atr_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_grp_atr" ("id") ON DELETE NO ACTION,
+    "tree_id" INT NULL,
+    "level" INT NULL,
+    "lft" INT NULL,
+    "rgt" INT NULL,
+    "name" VARCHAR(512) NULL,
+    "node_type" VARCHAR(512) NULL,
+    "created_on" DATETIME NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:35.403015
+CREATE TABLE "mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(200) NULL,
+    "name_fix" VARCHAR(200) NULL,
+    "tipo" VARCHAR(MAX) NULL,
+    "tipo2" INT NULL, CONSTRAINT "mod_tipo2__constraint" FOREIGN KEY ("tipo2") REFERENCES "mod_tipos2" ("id") ON DELETE CASCADE,
+    "um" INT NULL, CONSTRAINT "mod_um__constraint" FOREIGN KEY ("um") REFERENCES unidades ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2020-04-30T17:15:35.412771
+CREATE TABLE "mod_cmp"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_cmp_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cmp_tipo" VARCHAR(1) NULL,
+    "cmp_pie" INT NULL,
+    "cmp_mod" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:35.421635
+CREATE TABLE "mod_pie_fin"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_pie_fin_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cmp_pie" INT NULL, CONSTRAINT "mod_pie_fin_cmp_pie__constraint" FOREIGN KEY ("cmp_pie") REFERENCES "productos" (id_pieza) ON DELETE CASCADE,
+    "cantidad" FLOAT NULL,
+    "formula" VARCHAR(512) NULL,
+    "nivel" INT NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:35.429043
+CREATE TABLE "mod_rul"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL,
+    "filtro_descripcion" VARCHAR(200) NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:35.433660
+CREATE TABLE "mod_rul_lin"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod_rul" INT NULL, CONSTRAINT "mod_rul_lin_mod_rul__constraint" FOREIGN KEY ("mod_rul") REFERENCES "mod_rul" ("id") ON DELETE CASCADE,
+    "orden" INT NULL,
+    "cmp_pie_trg" INT NULL,
+    "formula_trg" VARCHAR(512) NULL,
+    "cmp_pie_tar" INT NULL,
+    "formula_tar" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:35.443215
+CREATE TABLE "mod_mod_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "mod" INT NULL, CONSTRAINT "mod_mod_atr_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_mod_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:38.127433
+CREATE TABLE "mod_cfg"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "name" VARCHAR(100) NULL,
+    "cfl_base" INT NULL, CONSTRAINT "mod_cfg_cfl_base__constraint" FOREIGN KEY ("cfl_base") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2020-04-30T17:15:38.133128
+CREATE TABLE "mod_cfg_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_mod_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_cfg_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "formula" VARCHAR(512) NULL,
+    "tipo" INT NULL, CONSTRAINT "mod_cfg_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE
+);
+faked!
+timestamp: 2020-04-30T17:15:38.139335
+CREATE TABLE "mod_cfg_tip"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_tip_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "mod_tipo" INT NULL, CONSTRAINT "mod_cfg_tip_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "min_mods" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:38.147911
+CREATE TABLE "mod_cfg_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_atr_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:38.223366
+CREATE TABLE "mod_cfg_tip_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg_tip" INT NULL, CONSTRAINT "mod_cfg_tip_atr_cfg_tip__constraint" FOREIGN KEY ("cfg_tip") REFERENCES "mod_cfg_tip" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_tip_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:38.303104
+CREATE TABLE "mod_pre_mod"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_mod_pre__constraint" FOREIGN KEY ("pre") REFERENCES "mod_pre" ("id") ON DELETE CASCADE,
+    "mod" INT NULL, CONSTRAINT "mod_pre_mod_mod__constraint" FOREIGN KEY ("mod") REFERENCES "mod" ("id") ON DELETE CASCADE,
+    "cantidad" INT NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:38.309561
+CREATE TABLE "mod_pre_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL, CONSTRAINT "mod_pre_atr_pre__constraint" FOREIGN KEY ("pre") REFERENCES "mod_pre" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_pre_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valor" VARCHAR(100) NULL,
+    "tag" BIT NULL
+);
+faked!
+timestamp: 2020-04-30T17:15:38.316519
+CREATE TABLE "mod_pre_nav"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "pre" INT NULL,
+    "posx" INT NULL,
+    "posy" FLOAT NULL,
+    "cfg" INT NULL, CONSTRAINT "mod_pre_nav_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "anchonave" INT NULL, CONSTRAINT "mod_pre_nav_anchonave__constraint" FOREIGN KEY ("anchonave") REFERENCES proatr_val ("id") ON DELETE CASCADE,
+    "unidades" INT NULL,
+    "longitud" FLOAT NULL
+);
+faked!
+timestamp: 2020-04-30T17:22:07.049165
+CREATE TABLE "mod_cfg_tip"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_tip_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "mod_tipo" INT NULL, CONSTRAINT "mod_cfg_tip_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "min_mods" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2020-04-30T17:22:07.138776
+CREATE TABLE "mod_cfg_tip_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg_tip" INT NULL, CONSTRAINT "mod_cfg_tip_atr_cfg_tip__constraint" FOREIGN KEY ("cfg_tip") REFERENCES "mod_cfg_tip" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_tip_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2020-04-30T17:24:26.014061
+CREATE TABLE "mod_cfg_tip"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_tip_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "mod_tipo" INT NULL, CONSTRAINT "mod_cfg_tip_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "min_mods" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+faked!
+timestamp: 2020-04-30T17:24:26.097846
+CREATE TABLE "mod_cfg_tip_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg_tip" INT NULL, CONSTRAINT "mod_cfg_tip_atr_cfg_tip__constraint" FOREIGN KEY ("cfg_tip") REFERENCES "mod_cfg_tip" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_tip_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+faked!
+timestamp: 2020-04-30T17:25:13.808638
+CREATE TABLE "mod_cfg_tip"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg" INT NULL, CONSTRAINT "mod_cfg_tip_cfg__constraint" FOREIGN KEY ("cfg") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE,
+    "mod_tipo" INT NULL, CONSTRAINT "mod_cfg_tip_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE,
+    "min_mods" INT NULL,
+    "formula" VARCHAR(512) NULL
+);
+success!
+timestamp: 2020-04-30T17:25:14.028140
+CREATE TABLE "mod_cfg_tip_atr"(
+    "id" INT IDENTITY PRIMARY KEY,
+    "cfg_tip" INT NULL, CONSTRAINT "mod_cfg_tip_atr_cfg_tip__constraint" FOREIGN KEY ("cfg_tip") REFERENCES "mod_cfg_tip" ("id") ON DELETE CASCADE,
+    "atr" INT NULL, CONSTRAINT "mod_cfg_tip_atr_atr__constraint" FOREIGN KEY ("atr") REFERENCES proatr_atr ("id") ON DELETE CASCADE,
+    "valores" VARCHAR(MAX) NULL,
+    "rango" VARCHAR(512) NULL,
+    "val_def" INT NULL,
+    "val_def_formula" VARCHAR(100) NULL,
+    "tipo" VARCHAR(1) NULL,
+    "lock" BIT NULL
+);
+success!
+timestamp: 2020-05-04T13:15:32.121815
+ALTER TABLE "mod_cfg" ADD "cfg_base" INT NULL; ALTER TABLE "mod_cfg" ADD CONSTRAINT "mod_cfg_cfg_base__constraint" FOREIGN KEY ("cfg_base") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE;
+timestamp: 2020-05-04T13:15:34.500684
+ALTER TABLE "mod_cfg" ADD "cfg_base" INT NULL; ALTER TABLE "mod_cfg" ADD CONSTRAINT "mod_cfg_cfg_base__constraint" FOREIGN KEY ("cfg_base") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE;
+timestamp: 2020-05-04T13:19:29.289141
+ALTER TABLE "mod_cfg" ADD "cfg_base" INT NULL; ALTER TABLE "mod_cfg" ADD CONSTRAINT "mod_cfg_cfg_base__constraint" FOREIGN KEY ("cfg_base") REFERENCES "mod_cfg" ("id") ON DELETE CASCADE;
+faked!
+timestamp: 2020-05-04T13:19:29.302861
+ALTER TABLE "mod_cfg" DROP COLUMN "cfl_base";
+faked!
+success!
+timestamp: 2020-05-04T13:19:30.496568
+ALTER TABLE "mod_pre_mod" ADD "cantidad__tmp" FLOAT NULL;
+faked!
+UPDATE "mod_pre_mod" SET "cantidad__tmp"="cantidad";
+faked!
+ALTER TABLE "mod_pre_mod" DROP COLUMN "cantidad";
+faked!
+ALTER TABLE "mod_pre_mod" ADD "cantidad" FLOAT NULL;
+faked!
+UPDATE "mod_pre_mod" SET "cantidad"="cantidad__tmp";
+faked!
+ALTER TABLE "mod_pre_mod" DROP COLUMN "cantidad__tmp";
+faked!
+timestamp: 2020-05-04T13:19:30.499353
+ALTER TABLE "mod_pre_mod" ADD "tipo" INT NULL; ALTER TABLE "mod_pre_mod" ADD CONSTRAINT "mod_pre_mod_tipo__constraint" FOREIGN KEY ("tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE;
+faked!
+success!
+timestamp: 2020-06-02T10:23:32.496727
+ALTER TABLE "mod_cfg" ADD "parent" INT NULL; ALTER TABLE "mod_cfg" ADD CONSTRAINT "mod_cfg_parent__constraint" FOREIGN KEY ("parent") REFERENCES "mod_cfg" ("id") ON DELETE NO ACTION;
+faked!
+timestamp: 2020-06-02T10:23:32.512778
+ALTER TABLE "mod_cfg" ADD "tree_id" INT NULL;
+faked!
+timestamp: 2020-06-02T10:23:32.514775
+ALTER TABLE "mod_cfg" ADD "level" INT NULL;
+faked!
+timestamp: 2020-06-02T10:23:32.515774
+ALTER TABLE "mod_cfg" ADD "lft" INT NULL;
+faked!
+timestamp: 2020-06-02T10:23:32.517779
+ALTER TABLE "mod_cfg" ADD "rgt" INT NULL;
+faked!
+timestamp: 2020-06-02T10:23:32.519777
+ALTER TABLE "mod_cfg" ADD "name__tmp" VARCHAR(512) NULL;
+faked!
+UPDATE "mod_cfg" SET "name__tmp"="name";
+faked!
+ALTER TABLE "mod_cfg" DROP COLUMN "name";
+faked!
+ALTER TABLE "mod_cfg" ADD "name" VARCHAR(512) NULL;
+faked!
+UPDATE "mod_cfg" SET "name"="name__tmp";
+faked!
+ALTER TABLE "mod_cfg" DROP COLUMN "name__tmp";
+faked!
+timestamp: 2020-06-02T10:23:32.528768
+ALTER TABLE "mod_cfg" ADD "node_type" VARCHAR(512) NULL;
+faked!
+timestamp: 2020-06-02T10:23:32.530766
+ALTER TABLE "mod_cfg" ADD "created_on" DATETIME NULL;
+faked!
+timestamp: 2020-06-02T10:23:32.532768
+ALTER TABLE "mod_cfg" ADD "comments" VARCHAR(MAX) NULL;
+faked!
+timestamp: 2020-06-02T10:23:32.535767
+ALTER TABLE "mod_cfg" DROP COLUMN "cfg_base";
+faked!
+success!
+timestamp: 2020-06-02T10:23:32.578277
+ALTER TABLE "mod_cfg_mod" ADD "mod_tipo" INT NULL; ALTER TABLE "mod_cfg_mod" ADD CONSTRAINT "mod_cfg_mod_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE;
+faked!
+timestamp: 2020-06-02T10:23:32.580274
+ALTER TABLE "mod_cfg_mod" DROP COLUMN "tipo";
+faked!
+success!
+timestamp: 2020-06-02T10:23:32.685596
+ALTER TABLE "mod_pre_mod" ADD "mod_tipo" INT NULL; ALTER TABLE "mod_pre_mod" ADD CONSTRAINT "mod_pre_mod_mod_tipo__constraint" FOREIGN KEY ("mod_tipo") REFERENCES "mod_tipos" ("id") ON DELETE CASCADE;
+faked!
+timestamp: 2020-06-02T10:23:32.687592
+ALTER TABLE "mod_pre_mod" DROP COLUMN "tipo";
+faked!
+success!
+timestamp: 2020-06-02T10:23:32.717751
+ALTER TABLE "mod_pre_atr" ADD "valor__tmp" VARCHAR(200) NULL;
+faked!
+UPDATE "mod_pre_atr" SET "valor__tmp"="valor";
+faked!
+ALTER TABLE "mod_pre_atr" DROP COLUMN "valor";
+faked!
+ALTER TABLE "mod_pre_atr" ADD "valor" VARCHAR(200) NULL;
+faked!
+UPDATE "mod_pre_atr" SET "valor"="valor__tmp";
+faked!
+ALTER TABLE "mod_pre_atr" DROP COLUMN "valor__tmp";
+faked!
+success!

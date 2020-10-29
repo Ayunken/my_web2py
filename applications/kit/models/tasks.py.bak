@@ -1,0 +1,7 @@
+# -*- coding: utf-8 -*-
+from gluon.scheduler import Scheduler
+def haz():
+    current.logger.debug("Test schedule %s"%request.vars.get('dato'))
+#Scheduler(db,dict(test=haz))
+planificador = Scheduler(db,migrate=True)
+planificador.queue_task(haz, pvars=dict(a=1, b=2))

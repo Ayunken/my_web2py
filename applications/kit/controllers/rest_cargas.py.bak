@@ -1,0 +1,315 @@
+# -*- coding: utf-8 -*-
+
+
+import datetime
+from custom import imprime_nota
+from formularios import *
+import os
+
+@request.restful()
+def api():
+    response.view='generic.'+request.extension
+    auth.settings.allow_basic_login = True
+    auth.basic()
+    def GET(funcion,**params):
+        if not auth.user: raise HTTP(403)
+        if funcion=="test":
+            return dict(resp=['ok'])
+        if funcion=="version":
+            apk=params.get("apk")
+            file = os.path.join(request.folder, 'static','updates','%s.apk'%apk)
+            resp=params
+            resp['date']=datetime.datetime.fromtimestamp(os.path.getmtime(file)).strftime('%Y-%m-%d %H:%M:%S')
+            return dict(resp=[resp])
+        elif funcion=='producto_carga_pte_carga':
+            idcarga=params.get('idcarga')
+            estado=int(params.get('estado'))
+            if idcarga:
+                campos=[db.vista_cargas_piezas[i] for i in ('codigo','producto','pedido','cantidadcargada','cantidadpreparada')]
+                sel=(db.vista_cargas_piezas.idcarga==idcarga)
+                if estado==1:
+                     sel=(sel & ( db.vista_cargas_piezas.cantidadcargada>0))
+                elif estado==2:
+                     sel=(sel & ( db.vista_cargas_piezas.cantidadpreparada>0))
+                else:
+                     sel=(sel & (( db.vista_cargas_piezas.cantidadcargada>0) |  (db.vista_cargas_piezas.cantidadpreparada>0)))
+                row=db(sel).select(*campos,orderby=(db.vista_cargas_piezas.codigo,db.vista_cargas_piezas.pedido))
+            else:
+                row=[{'errors':'Id de carga no informado'}]
+            #return db._lastsql
+            return dict(resp=row)
+        elif funcion=='producto_carga_pte':
+            if params.has_key('barcode'):
+                codigos=desmonta_barcode(params['barcode'])
+                idp=codigos.get('id_pieza')
+            else:
+                idp=params.get("idpieza")
+            idc=params.get("idcarga")
+            pedido=params.get('pedido')
+            seleccion=(db.vista_cargas_piezas.idcarga==idc) &(db.vista_cargas_piezas.pedido==pedido) &(db.vista_cargas_piezas.cantidadpendientepreparar>0)
+            if idp:
+                seleccion=seleccion &   (db.vista_cargas_piezas.idpieza==idp)
+            row=db(seleccion).select(orderby=(db.vista_cargas_piezas.codigo))
+            if not row: #si no esta en el pedido, buscamos en otro pedido de la mism carga
+                if idp and pedido:
+                    seleccion=(db.vista_cargas_piezas.idcarga==idc) &(db.vista_cargas_piezas.cantidadpendientepreparar>0) & (db.vista_cargas_piezas.idpieza==idp)
+                    row=db(seleccion).select(orderby=(db.vista_cargas_piezas.codigo))
+                if  row:
+                    if params.has_key('barcode'):
+                        for i in row: i['cantidad']=codigos.get('cantidad')
+                    row=[{'errors':'Producto no pendiente en este pedido. Seleccionar otro pedido.','pedidos':row}]
+                else:
+                    row=[{'errors':'Producto no pendiente en esta carga'}]
+            else: #le añado la cantidad del codigo de barras y la la línea del bulto si existe ya
+                if params.has_key('barcode'):
+                    row[0]['cantidad']=codigos.get('cantidad')
+                if params.get("idbulto"):
+                    row2=db((db.vista_lineas_bulto.idbulto==params.get("idbulto")) & (db.vista_lineas_bulto.idpieza==idp) & (db.vista_lineas_bulto.pedido==params.get("pedido")) ).select().first()
+                    if row2:
+                         row=[row[0],row2]
+            return dict(resp=row)
+        elif funcion=='pedidos_carga':
+            id=params.get('idcarga')
+            row=db(db.pedidos_carga.idcarga==id).select(orderby=db.pedidos_carga.pedido)
+            if not row:
+                row=[]
+            return dict(resp=row)
+        elif funcion=='tipos_bulto':
+            if params.get("id"):
+                id=params.get('id')
+                row=db(db.varios.id==id).select(orderby=db.varios.id)
+            else:
+                id=59
+                row=db(db.varios.tipo==id).select(orderby=db.varios.id)
+            if not row:
+                row=[]
+            return dict(resp=row)
+        if funcion=='tipos_embalaje':
+            if params.get("id"):
+                id=params.get('id')
+                row=db(db.varios.id==id).select(orderby=db.varios.id)
+            else:
+                id=55
+                row=db(db.varios.tipo==id).select(orderby=db.varios.id)
+            if not row:
+                row=[]
+            return dict(resp=row)
+        elif funcion=='lineas_bulto_carga':
+            id=params.get('id')
+            sel=(db.vista_lineas_bulto.idbulto==id)
+            if params.has_key('barcode'):
+                codigos=desmonta_barcode(params['barcode'])
+                idp=codigos.get('id_pieza')
+            else:
+                idp=params.get("idpieza")
+            if idp:
+                sel=sel & (db.vista_lineas_bulto.idpieza==idp)
+            row=db(sel).select(orderby=db.vista_lineas_bulto.codigo)
+            if not row:
+                row=[]
+            return dict(resp=row)
+        elif funcion=='bulto_carga': # 1 bulto
+            id=params.get('id')
+            row=db(db.vista_bultos.id==id).select()
+            if not row:
+                row=[]
+            return dict(resp=row)
+        elif funcion=='bultos_carga':
+            id=params.get('id')
+            row=db(db.vista_bultos.idcarga==id).select(orderby=db.vista_bultos.numerobulto)
+            if not row:
+                row=[]
+            return dict(resp=row)
+        elif funcion=='producto' or funcion=='productos_stock':
+            if funcion=='producto':
+                tabla=db.productos
+            else:
+                tabla=db.productos_stock
+            id=params.get("id")
+            if params.has_key('barcode'):
+                codigos=desmonta_barcode(params['barcode'])
+                id=codigos.get('id_pieza')
+            if params.has_key('codigo'):
+                row=db(tabla.codigo==params['codigo']).select()
+            else:
+                row=[tabla(id)]
+            if row and params.has_key('barcode'):
+                row[0]['cantidad']=codigos.get('cantidad')
+            if not row:
+                row=[{'errors':'Producto no encontrado'}]
+            return dict(resp=row)
+        elif funcion=='producto_mov' or funcion=='get_producto_mov':
+            id=params.get("id")
+            limite=params.get("limite")
+            if limite:
+                limite=(0,int(limite))
+            else:
+                limite=None
+            row=db(db.productos_mov.id_pieza==id).select(orderby=~db.productos_mov.fechahora,limitby=limite)
+            if not row:
+                row=[]
+            return dict(resp=row)
+        elif funcion=='cargas':
+            id= params.get('id')
+            if id:
+                row=db(db.cargas.id==id).select()
+            else:
+                row=db(db.cargas.estado==2601).select(orderby=(db.cargas.fecha,db.cargas.ordencarga))
+            #for r in row:
+            #    if r.fecha :
+            #         r.fecha=db.entregas.fecha.represent(r.fecha,r)
+            return dict(resp=row)
+        else:
+            raise HTTP(400,'Función %s no válida' % funcion)
+# POST: tabla=lecturas, campos: 'maquina','dispositivo' obligados. Resto se pasan al uddate de tabla lecturas
+#       tabla=dispostivio, campos: 'dispositivo','imeiPhone', 'action=lock' o 'action=unlock' para desbloquear
+    def POST(funcion,**campos):
+        if not auth.user: raise HTTP(403)
+        resp={'errors':'Faltan parámetros'}
+        if funcion=='bulto_estado': #CARGA , DESCARGA DE BULTO
+            id=campos.get("id")
+            estado=campos.get("estado")
+            if id:
+                resp=db(db.cab_bultos.id==id).validate_and_update(estado=estado,pesobruto=campos.get("pesobruto"))
+                db.executesql("Actualiza_PesosBulto %s" %id)
+                db.executesql("Actualiza_CargasBultos %s" % db.cab_bultos(id).idcarga)
+        elif funcion=='producto_upd':
+            id=campos.get('id')
+            if id:
+                del campos['id']
+                resp=db(db.productos.id==id).validate_and_update(**campos)
+        elif funcion=='lin_carga_add': #esto es para cargar directamente una pieza en la carga, sin meter en bulto
+            idcarga=campos.get('idcarga')
+            if idcarga:
+                sel=db((db.vista_cargas_piezas.idcarga==idcarga)&(db.vista_cargas_piezas.idpieza==campos['idpieza']) &(db.vista_cargas_piezas.pedido==campos['pedido']))
+                row=db(sel).select().first()
+                if row:
+                    row.update(cantidad=campos['cantidad'],kgsteoricos=campos['pesoneto'])
+                else:
+                    resp['errors']='Pieza no encontrada en la carga'
+            else:
+                resp['errors']='Carga no informada'
+            if not resp.get('errors'):
+                    resp['errors']=''
+        elif funcion=='lin_bulto_carga_add':
+            if campos.get('idbulto') and campos.get('idpieza'):
+                resp=db.lin_bultos.validate_and_insert(**campos)
+                db.executesql("Actualiza_PesosBulto %s" %campos['idbulto'])
+                pr=db.productos(campos.get('idpieza'))
+                if pr:
+                    if campos.get('idembalaje')!=pr('idembalaje') and campos.get('idembalaje')!='null':
+                            idemb=campos.get('idembalaje')
+                            pr.update_record(idembalaje=idemb)
+            else:
+                resp['errors']='Falta informar de bulto y pieza'
+            if not resp.get('errors'):
+                    resp['errors']=''
+        elif funcion=='lin_bulto_carga_upd':
+            id=campos.get('id')
+            if id:
+                del campos['id']
+                resp=db(db.lin_bultos.id==id).validate_and_update(**campos)
+                idbulto=db.lin_bultos(id).idbulto
+                db.executesql("Actualiza_PesosBulto %s" % idbulto)
+            else:
+                resp['errors']='No se informó del id de linea'
+            if not resp.get('errors'):
+                    resp['errors']=''
+        elif funcion=='lin_bulto_carga_del':
+            id=campos.get('id')
+            resp={'errors':''}
+            if id:
+                idbulto=db.lin_bultos(id).idbulto
+                if not db(db.lin_bultos.id==id).delete():
+                    resp['errors']='No se pudo borrar'
+                db.executesql("Actualiza_PesosBulto %s" % idbulto)
+            else:
+                resp['errors']='No se informó del id de linea'
+        elif funcion=='bulto_carga_add':
+            if not campos.get('fechaalta'):
+                campos['fechaalta']=request.now
+            try:
+                resp=db.cab_bultos.validate_and_insert(**campos)
+            except:
+                resp['erros']='El número de bulto %(numerobulto)s ya existe en la carga. id:%(id)s'%campos
+            if not resp.get('errors'):
+                resp['errors']=''
+        elif funcion=='bulto_carga_upd':
+            id=campos.get('id')
+            if id:
+                del campos['id']
+                resp=db(db.cab_bultos.id==id).validate_and_update(**campos)
+                db.executesql("Actualiza_PesosBulto %s" % id)
+            else:
+                resp['errors']='Falta informar del id del bulto'
+            if not resp.get('errors'):
+                    resp['errors']=''
+        elif funcion=='bulto_carga_del':
+            id=campos.get('id')
+            resp={'errors':'No se pudo borrar'}
+            if id:
+                db(db.lin_bultos.idbulto==id).delete()
+                if db(db.cab_bultos.id==id).delete():
+                    resp['errors']=''
+                db.executesql("Actualiza_PesosBulto %s" % id)
+            else:
+                resp['errors']='No se informó del id de bulto'
+        elif funcion=='productos_mov_add':
+            prod=db.productos(campos.get('id_pieza'))
+            if  prod:
+                umf=prod.cod_uni
+                current.logger.debug('productos_mov_add:%s'%campos)
+                cnv=db.executesql("select dbo.convierte_unidades_materia2(%s,'%s','%s',%s)" % (campos.get('cantidadum'),campos.get('unidadmedida'),umf,campos['id_pieza']))
+                if cnv:
+                    cantidad=cnv[0][0]
+                else:
+                    cantidad=campos.get('cantidadum')
+                resp=db.productos_mov0.validate_and_insert(fecha=campos['fecha'],
+                                             id_pieza=campos['id_pieza'],
+                                             tipo=4, #inventario
+                                             codalmacen= 1, #inverca warehouse
+                                             codemp=campos.get('codemp') or 2, #invertec
+                                             cantidad=cantidad,
+                                             fechahora=campos['fechahora'],
+                                             cantidadum=campos.get('cantidadum'),
+                                             unidadmedida=campos.get('unidadmedida'),
+               )
+                if not resp.get('errors'):
+                    resp['errors']=''
+            else:
+                resp['errors']='Producto no encontrado'
+        elif funcion=='pictures':
+            if not campos.has_key('serie') or not campos.has_key('id'): raise HTTP(400, campos)
+            id=campos['id']
+            serie=campos['serie']
+            resp={}
+            resp['serie']=serie
+            resp['id']=serie
+            if serie=='CA':
+                camino=os.path.join(myconf.get('paths.docscargas') ,'%06d'% int(id))
+            else:
+                camino=''
+            if camino:
+                touch_dir(camino)
+                imagen=None
+                resp['errors']='No se guardaron imágenes'
+                resp['imagenes']=[]
+                resp['funcion']=funcion
+                for k in campos:
+                    if k.startswith('imagen'):
+                        imagen=campos[k]
+                        filename=k.split('imagen_')[1]
+                        filepath = os.path.join(camino,filename)
+                        f=open(filepath,'wb')
+                        f.write(imagen.value)
+                        f.flush()
+                        f.close()
+                        resp['resp']='ok'
+                        resp['imagenes']+=[filename]
+                        resp['errors']=''
+            else:
+                resp['errors']='Serie %s no tiene establecido guardar imágenes.'%serie
+        else:
+             raise HTTP(400,'Función %s no válida' % funcion)
+        return dict(resp=[resp])
+    return locals()

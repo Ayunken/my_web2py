@@ -1,0 +1,3 @@
+<div class='web2py_grid'>
+<table>{{=arbol}}{{=grid}}</table>
+</div>

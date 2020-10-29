@@ -1,0 +1,20 @@
+<script type="text/javascript"><!--
+ $('#{{=key3}}').val('');
+ var e=event.which?event.which:event.keyCode;
+ function {{=u}}(){
+	if ($('#{{=key}}').val()!='-1') 
+		{$('#{{=id}}').val($('#{{=key}} :selected').text());$('#{{=key3}}').val($('#{{=key}}').val())} 
+	else {$('#{{=idcomp}}').dialog('open');
+		  web2py_component('{{=urlcomp}}&field={{=field}}&name='+escape($('#{{=id}}').val()),'{{=idcomp}}');
+		}
+ };
+ if (e==39)
+	{{=u}}();
+	else if (e==40) {if($('#{{=key}} option:selected').next().length)$('#{{=key}} option:selected').attr('selected',null).next().attr('selected','selected'); 		{{=u}}();}
+	else if (e==38) {if($('#{{=key}} option:selected').prev().length)jQuery('#{{=key}} option:selected').attr('selected',null).prev().attr('selected','selected'); {{=u}}();}
+	else if ($('#{{=id}}').val().length>={{=min_length}}) 
+			$.get('{{=url}}?{{=key}}='+escape($('#{{=id}}').val()),function(data){
+					if(data=='') $('#{{=key3}}').val('');else{$('#{{=id}}').next('.error').hide(); $('#{{=div_id}}').html(data).show().focus();$('#{{=div_id}} select').css('width',$('#{{=id}}').css('width'));$('#{{=key3}}').val($('#{{=key}}').val());$('#{{=key}}').change({{=u}});$('#{{=key}}').click({{=u}});};}
+			);
+	else $('#{{=div_id}}').fadeOut();
+--></script>

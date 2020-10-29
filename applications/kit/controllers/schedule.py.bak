@@ -1,0 +1,41 @@
+# -*- coding: utf-8 -*-
+# intente algo como
+import time
+def haz():
+    #en request args tenemos argumentos pasados despues de la funcion haz/arg1/arg2
+    #request.vars no tiene variables si viene la llamada desde el cron
+    
+    test_mail(request.args[0] if len(request.args)>0 else '')
+    current.logger.debug("Test schedule args:%s "%(request.args))
+    # Do what ever you want to do in python
+    # long duration HTTP requests
+    # FTP Access, download to local, untar, unzip, copy, move,
+    # In this poor example, just sleeping for 5 seconds
+#if __name__ == '__main__':
+#    main()
+
+def test_mail(dato):
+    bases = ['inverca.es']
+    prefixes = ['smtp.']
+    ports =[':25',':465', ':993', ':587', '']
+    sender = 'inverca@inverca.es'
+    login = 'inverca:inverwin1980'
+    send_test_to = 'juliodelbarrio@gmail.com'
+    count = 0
+    mail.settings.tls = True #Here so you can set to False if things fail?
+    for base in bases:
+        for prefix in prefixes:
+            for port in ports:
+                server = '{0}{1}{2}'.format(prefix, base, port)
+                msg = 'server: {0} login: {1}'.format(server, login)
+                # So you can correlate with error codes. Note some servers don't like print!
+                mail.settings.server = server
+                mail.settings.sender = sender
+                mail.settings.login = login
+                mail.send(to=[send_test_to],
+                    subject='inicio %s '%dato,
+                    reply_to='jbs@inverca.es',
+                    message=msg
+                    )
+                count += 1
+    return

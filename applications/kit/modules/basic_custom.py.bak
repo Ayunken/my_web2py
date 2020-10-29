@@ -1,0 +1,189 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from gluon import *
+import datetime
+from gluon import current
+T=current.T
+import custom
+
+class GRAL(): #constantes globales propias
+    #opciones predeterminadas para SQLFORM.grid
+    """
+    ESTAS VARIABLES GLOBALES SE MANTIENEN LOS CAMBIOS SI LAS MODIFICAS INCLUSO ENTRE PAGINAS DIFERENTES DE LA MISMA SESION!!!!
+    """
+    dateFmt='%d/%M/%Y'
+    timeFmt='%d/%h/%y %H:%m'
+    dateFormat=custom.current.T(dateFmt)
+    dateError=custom.current.T('Must be DD/MM/YYYY!')
+    currency_simbol='€'
+    labelcompany='INVERCA'
+    grid_defaults={'exportclasses': dict(xml=False,json=False,tsv=False,tsv_with_hidden_cols=False,csv_with_hidden_cols=False),
+                   'maxtextlength': 200,
+                   'showbuttontext': False,
+                   'paginate': 100,
+                   'links_in_grid': True,
+                   'details': False,
+                   #'ui': 'jquery-ui'
+                  }
+    #opciones predeterminadas añadidas para PDFS de SQLFORM.grid
+    grid_adddefaults_pdf={'paginate': None,
+                          'csv': False,
+                          'details': False,
+                          'links_in_grid': False
+                          }
+    grid_pdf_defaults=grid_defaults.copy()
+    grid_pdf_defaults.update(grid_adddefaults_pdf)
+    def represent_currency(self, value):
+        if value == None:
+            return custom.DIV('-', _style='text-align: right;')
+        else:
+            return custom.DIV('%.2f%s' % ((0 if value == None else value), self.currency_simbol), _style='text-align: right;')
+
+
+    def fechaq(self,fecha):
+        return custom.datetime.date(fecha.year, fecha.month, fecha.day)
+
+def myFormValidation(form):
+    tabla,r,s=form.table,form.vars,form.record
+    dupmessage=custom.T('Valor ya existente en la base de datos')
+    def validate_duplicates(query,s=None):
+        if s:
+            query=(query) & (tabla.id!=s.id)
+        query=db(query).select()
+        if query:
+            return True
+    db=tabla._db
+    tablename=tabla._tablename
+    if tabla==db.mod_val:
+        mod_atr_id=int(form.custom.inpval.atr or tabla.atr.default)
+        #integridad referencial en listas de valores atributos piezas
+        #if db(db.mod_mod_atr.valores.contains(db.
+        if validate_duplicates((((tabla.name==r.name) | (tabla.valor==r.valor) )  & (tabla.atr==mod_atr_id)),s):
+            form.errors.valor=dupmessage
+    elif tabla==db.mod_cmp:
+        mod_id=int(form.custom.inpval.mod or tabla.mod.default)
+        if mod_id==r.cmp_mod and r.cmp_tipo==custom.MOD_CMP_TIPO.modulo:
+            form.errors.cmp_mod=custom.T('Un módulo no puede ser componente de sí mismo')
+        elif not r.cmp_mod and r.cmp_tipo==custom.MOD_CMP_TIPO.modulo:
+            form.errors.cmp_mod=custom.T('Módulo no puede estar vacío')
+        elif not r.cmp_pie and r.cmp_tipo==custom.MOD_CMP_TIPO.pieza:
+            form.errors.cmp_pie=custom.T('Pieza no puede estar vacío')
+        if r.cmp_tipo==custom.MOD_CMP_TIPO.modulo:
+            errfield='cmp_mod'
+            if custom.mod_es_descendiente(db, mod_id, r.cmp_mod):
+                form.errors.cmp_mod=custom.T('Módulo padre es componente descendiente del módulo componente introducido')
+            elif custom.mod_es_ancestro(db, r.cmp_mod, mod_id):
+                form.errors.cmp_mod=custom.T('Módulo componente introducido es contenedor del módulo padre')
+        else:
+            errfield='cmp_pie'
+        if validate_duplicates((((tabla.cmp_pie!=None) | (tabla.cmp_mod!=None )) & (tabla.mod==mod_id) & (tabla.cmp_pie==r.cmp_pie)  & (tabla.cmp_mod==r.cmp_mod) & (tabla.cmp_tipo==r.cmp_tipo)),s):
+            form.errors[errfield]=dupmessage
+    elif tabla==db.mod_mod_atr or tabla==db.mod_cfg_atr or tabla==db.mod_cfl_atr:
+        form.vars.tipo=db.mod_atr(form.vars.atr).tipo
+        if r.tipo==custom.MOD_ATR_TIPO.valores and r.valores:
+            if not (str(r.val_def) in r.valores):
+                form.errors.val_def=custom.T('No está en rango de valores')
+        if tabla==db.mod_mod_atr:
+            idpater = int(form.custom.inpval.mod or tabla.mod.default)
+            if validate_duplicates((tabla.atr==r.atr)  & (tabla.mod==idpater),s):
+                form.errors.atr=dupmessage
+        if tabla == db.mod_cfg_atr:
+            idpater = int(form.custom.inpval.cfg or tabla.cfg.default)
+            if validate_duplicates((tabla.atr == r.atr) & (tabla.cfg == idpater), s):
+                form.errors.atr = dupmessage
+        if tabla==db.mod_cfl_atr:
+            idpater = int(form.custom.inpval.cfl or tabla.cfl.default)
+            if validate_duplicates((tabla.atr==r.atr)  & (tabla.cfl==idpater),s):
+                form.errors.atr=dupmessage
+def myFormCreated(form):
+
+    return myFormAccepted(form)
+
+
+def myFormAccepted(form):
+    tabla=form.table
+    db=form.table._db
+    if tabla==db.mod_mod_atr:
+        mod_id=form.custom.inpval.mod  or tabla.mod.default
+        custom.recolectar_atributos_ascendientes(mod_id, db)
+    elif tabla==db.mod_cmp:
+        mod_id=form.custom.inpval.mod or tabla.mod.default
+        custom.recolectar_atributos_modulo(mod_id, tabla)
+    elif tabla==db.mod_cfg_mod:
+        mod_cfg=form.custom.inpval.cfg or tabla.cfg.default
+        custom.recolectar_atributos_modulo(mod_cfg, tabla)
+
+def myFormDeleted(table,id):
+    db=table._db
+    if table==db.mod_mod_atr:
+        mod_id=table[id].mod
+        custom.recolectar_atributos_ascendientes(mod_id, db, id_modatr_del=id)
+    elif table==db.mod_cmp:
+        mod_id=table[id].mod
+        custom.recolectar_atributos_modulo(mod_id, table, id_modcmp_del=id)
+    elif table==db.mod_cfg_mod:
+        mod_id=table[id].cfg
+        custom.recolectar_atributos_modulo(id, table, id_modcmp_del=id)
+
+
+from plugin_jstree import JsTree
+"""
+version de JsTree para el arbol de tipos de módulos en ficha de Configuracion
+se reescribe la rutina get_node
+"""
+class JsTree_cfgmod(JsTree):
+    def __init__(self,tree_model,cfg_id, **resto):
+        JsTree.__init__(self,tree_model,**resto)
+
+    def get_node(self, nodeid):
+        data = []
+        db=self.tree_model.table._db
+        if nodeid == '#':
+            nodes = self.tree_model.roots().select()  # plugin de mantenimiento muestro desde raiz
+        else:
+            id = nodeid
+            if str(id).find('_') >= 0:
+                id = id.split("_")[1]
+            nodes = self.tree_model.get_childs_from_node(id).select()
+        for i, node in enumerate(nodes):
+            count = self.tree_model.count_descendants_from_node(node)
+            visible = True
+            if self.filter:
+                # if not self.tree_model.db(self.filter)(self.tree_model.db.mod_cfl_tip.mod_tipo==node.id).select():
+                left=db.mod_cfg_mod.on(db.mod_cfg_mod.tipo==db.mod_cfl_tip.mod_tipo)
+                suma=db.mod_cfg_mod.id.count();
+                field_id=self.tree_model.settings.table_node.id
+                field2=db.mod_cfl_tip.min_mods
+                rows = self.tree_model.descendants_from_node(node.id, include_self=True)(self.filter).select(field_id,field2, suma,left=left,groupby=[field_id,field2])
+                if not rows:
+                    visible = False
+                else:
+                    count = len(rows)
+                    children=(count > 0)
+                    if count == 1 and rows[0].mod_tipos.id == node.id:  # si el unico obtenido es él mismo, no hay descencdencia valida
+                        count = rows[0].mod_cfl_tip.min_mods
+                        children=False
+                ################ CUSTOM CUSTOM CUSTOM ##############
+                #### Contar numero de modulos que tienen la configuracion en este tipo de modulo
+                count2 = 0
+                for r in rows:
+                    count2 += r[suma]
+            if visible:
+                tipo = 'root' if count  else None
+                if count2==count:
+                    tipo="ok"
+                else:
+                    tipo="nok"
+                countx = " [%s/%s]" % (count2,count)
+                data.append(dict(id='node_%s' % node.id, text=node.name + countx, children=children, type=tipo))
+        return data
+
+    def __call__(self,args=[]):
+        return JsTree.__call__(self,args=[])
+
+def report_fields_list(db):
+    """ Lista de campos de cada informe """
+    return {'mod_atr': [db.mod_atr.name, db.mod_atr.clave, db.mod_atr.grp_atr,db.mod_atr.val_def,
+                        db.mod_atr.tipo, db.mod_atr.val_def_disp,  db.mod_atr.val_def_formula,
+                        db.mod_atr.rango_disp, db.mod_atr.rango, db.mod_atr.orden_descripcion]
+            }

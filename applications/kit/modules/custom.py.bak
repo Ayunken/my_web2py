@@ -1,0 +1,573 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from gluon import *
+import datetime
+from gluon import current
+T=current.T
+import sys, re, os
+from basic import *
+
+FORMULAS_SEPARADORES='[]'
+FORMULAS_REGEXPR="\[[^\[]*\]"
+
+class MOD_ATR_TIPO():
+    formula='F'
+    valores='V'
+    @classmethod
+    def getitems(self):
+        return {self.formula:'Formula',self.valores:'Valores discretos'}
+
+class MOD_CMP_TIPO():
+    pieza='P'
+    modulo='M'
+    @classmethod
+    def getitems(self):
+        return {self.pieza:'Pieza',self.modulo:'Módulo'}
+
+class ATR_ESPECIAL():
+    PZORIGEN=112
+## validador
+class IS_FORMULA(object):
+    def __init__(self, db, field_variables, error_message=T('Formula incorrecta: '),current_atr_id=None):
+        self.db=db
+        self.field_variables=field_variables
+        self.table=db[field_variables._tablename]
+        self.e = error_message
+        self.atr_id=current_atr_id
+    def _busca_atr_en_descendientes(self,atr_id,formula):
+        lista = IS_FORMULA.lista_vars(formula)
+        for i in lista:
+            reg=self.table(i)
+            if reg:
+                if FORMULAS_SEPARADORES[0]+str(atr_id)+FORMULAS_SEPARADORES[1] in reg.val_def_formula:
+                    return True
+                else:
+                    if self._busca_atr_en_descendientes(atr_id,reg.val_def_formula):
+                        return True
+    def _validate(self,value):
+        lista = IS_FORMULA.lista_vars(value)
+        errores=''
+        variables={}
+        if self.atr_id:
+            if self.table[self.atr_id].clave in lista:
+                errores = T('Existe referencia al atributo actual ')
+        if not errores:
+            for key in lista:
+                row=self.table(self.field_variables==key)
+                if row:
+                    if self.atr_id and row.tipo==MOD_ATR_TIPO.formula:
+                        if self._busca_atr_en_descendientes(self.atr_id,row.val_def_formula):
+                            errores+= '%satributo %s tiene referencias al atributo actual' % (',' if errores else '', key)
+                    variables[key]=row.id # le pongo un valor para que la evaluación de un resultado
+
+                else:
+                    errores+='%satributo %s no existe' % (',' if errores else '',key)
+        if errores:
+            self.e+=errores
+            return
+        formula=str(value).replace(FORMULAS_SEPARADORES[0],'%(').replace(FORMULAS_SEPARADORES[1],')s') #cambia los corchetes por %(key)s para que se pueda formatear con el diccionario al evaluar
+        try:
+            a=eval(formula % variables)
+            formula=str(value).replace(FORMULAS_SEPARADORES[0],FORMULAS_SEPARADORES[0]+'%(').replace(FORMULAS_SEPARADORES[1],')s'+FORMULAS_SEPARADORES[1])
+            return (formula % variables)
+        except:
+            self.e+=sys.exc_info()[0]
+            return
+
+    def __call__(self, value):
+        ret=self._validate(value)
+        if ret:
+            return ret, None
+        return (value, self.e)
+    def formatter(self, value):
+        return  IS_FORMULA.formatea(self.db,value,self.field_variables)
+    @staticmethod
+    def lista_vars(cadena):
+        if cadena:
+            regex = re.compile(FORMULAS_REGEXPR)  # busca cadenas de texto que empiezen por [ (no sigan por '[' ) y acaben en ']'
+            lista=regex.findall(str(cadena))
+            for k  in range(0,len(lista)):
+                lista[k]=lista[k].replace(FORMULAS_SEPARADORES[0],'').replace(FORMULAS_SEPARADORES[1],'')
+            return lista
+        else:
+            return []
+    @staticmethod
+    def formatea(db,value,field_variables):
+        table=db[field_variables._tablename]
+        if value:
+            lista=IS_FORMULA.lista_vars(value)
+            errores=''
+            variables={}
+            for key in lista:
+                row=table[key]
+                if row:
+                    variables[key]=row[field_variables.name] # y o cambiamos por el nombre clave de la variable
+                else:
+                    variables[key]=key
+            formula=str(value).replace(FORMULAS_SEPARADORES[0],FORMULAS_SEPARADORES[0]+'%(').replace(FORMULAS_SEPARADORES[1],')s'+FORMULAS_SEPARADORES[1])
+            return  (formula % variables)
+        else:
+            return ''
+    @staticmethod
+    def formatea_ro(db,value,field_variables):
+        table=db[field_variables._tablename]
+        if value:
+            lista=IS_FORMULA.lista_vars(value)
+            errores=''
+            variables={}
+            for key in lista:
+                row=table[key]
+                if row:
+                    variables[key]=row[field_variables.name] # y o cambiamos por el nombre clave de la variable
+                else:
+                    variables[key]=key
+            formula=str(value).replace(FORMULAS_SEPARADORES[0],FORMULAS_SEPARADORES[0]+'%(').replace(FORMULAS_SEPARADORES[1],')s'+FORMULAS_SEPARADORES[1])
+            cad=formula % variables
+            c=''
+            ret=[]
+            for i in cad:
+                if i==FORMULAS_SEPARADORES[0]:
+                    if c:
+                        ret.append(SPAN(c))
+                        c=''
+                elif i==FORMULAS_SEPARADORES[1]:
+                    if c:
+                        ret.append(SPAN(c,_style='background-color: cyan; border: 1px solid blue; border-radius: 5px; padding: 1px; text-transform: lowercase; font-size: 10px;'))
+                        c=''
+                else:
+                    c+=i
+            if c:
+                ret.append(SPAN(c))
+            return DIV(ret)
+        else:
+            return ''
+
+class IS_RANGE(IS_FORMULA):
+    def formatter(self, value):
+        return IS_FORMULA.formatter(self,value)
+    def __call__(self,value):
+        (ret, e)=IS_FORMULA.__call__(self,'xrange(%s)' % value)
+        if not e:
+            ret=ret.replace('xrange(','')[0:-1]
+        return ret,e
+
+"""
+Evalúa una fórmula de un presupuesto buscando los valores de variables en atributos del diccionario
+uso: formula=Formula(db, {1:['V/F',valor]},'5*[1]')    # donde [1] es el atributo con id=1, que ha de estar en el diccionario de atributos
+     formula._expresion         #devuelve la expresion ya con valores lista para evaluar, si se instanció el objeto pasando la formula, no la vuelve a calcular
+     formula()                  #evalua la expresion ya calculada de la formula pasada al instanciar
+     formula('5*[2]')           #evalua una nueva expresion pasada como argumento
+     formula.expresion('5*[3]') #devuelve la expresion de la formula pasada como argumento
+"""
+class Formula(object):
+    def __init__(self,db,atrdict,formula=None):
+        #atrdict: diccionario de atributos
+        #        {idatr: [tipo,valor],....}
+        #Extrae la lista de variables que usa
+        self.db=db
+        self.atrdict = atrdict
+        #Rellena diccionario de variables con el su valor en el prespuestos
+        if formula:
+            self._expresion=self.expresion(formula)
+        else:
+            self._expresion=None
+
+    def lista_variables(self,formula):
+        return  IS_FORMULA.lista_vars(formula)
+
+    def expresion(self,f):
+        formula=f
+        variables = {}
+        lista=self.lista_variables(formula)
+        for key in lista:
+            if key in self.atrdict:
+                valor=self.atrdict[key][1]
+                if not valor:
+                    valor='0'
+                elif self.atrdict[key][0]==MOD_ATR_TIPO.valores:  # si tipo variable es valores, hay que buscar su valor en mod_val
+                    valor=self.db.mod_val[valor].valor
+                if not is_number(valor):
+                    valor = '\'%s\'' % valor
+            else:
+                valor='0'
+            formula= formula.replace(FORMULAS_SEPARADORES[0] + key + FORMULAS_SEPARADORES[1], str(valor))
+        return formula
+    def __call__(self,formula=None):   #devuelve el resultado evaluado
+            if formula:
+                self._expresion=self.expresion(formula)
+            try:
+                return eval(self._expresion)
+            except:
+                sys.exc_info()[0]
+            return None
+
+"""
+Evalúa una fórmula de un presupuesto buscando los valores de variables en atributos del presupuesto mod_pre_atr
+uso: formula=Formula(db,1,'5*[1]')    # donde [1] es el atributo con id=1
+     formula._expresion         #devuelve la expresion ya con valores lista para evaluar, si se instanció el objeto pasando la formula, no la vuelve a calcular
+     formula()                  #evalua la expresion ya calculada de la formula pasada al instanciar
+     formula('5*[2]')           #evalua una nueva expresion pasada como argumento
+     formula.expresion('5*[3]') #devuelve la expresion de la formula pasada como argumento
+     ESTO CUANDO PUEDAS SIMPLIFICALO Y HAZLO EXTENDIENDO LA CLASE FORMULA
+"""
+class Formula_Pre(object):
+    def __init__(self,db, id_pre,formula=None):
+        #Extrae la lista de variables que usa
+        self.tabla=db.mod_pre_atr
+        self.db=db
+        self.id_pre=id_pre
+        #Rellena diccionario de variables con el su valor en el prespuestos
+        if formula:
+            self._expresion=self.expresion(formula)
+        else:
+            self._expresion=None
+
+    def lista_variables(self,formula):
+        return  IS_FORMULA.lista_vars(formula)
+
+    def expresion(self,f):
+        formula=f
+        variables = {}
+        for key in self.lista_variables(formula):
+            row = self.db((self.tabla.atr == key) & (self.tabla.pre==self.id_pre)).select(self.tabla.atr,self.tabla.valor)
+            if row:
+                row=row.first()
+                valor=row.valor
+                if not valor:
+                    valor='0'
+                elif row.atr.tipo==MOD_ATR_TIPO.valores:  # si tipo variable es valores, hay que buscar su valor en mod_val
+                    valor=self.db.mod_val[valor].valor
+                if not is_number(valor):
+                    valor = '\'%s\'' % valor
+            else:
+                valor='0'
+            formula= formula.replace(FORMULAS_SEPARADORES[0] + key + FORMULAS_SEPARADORES[1], str(valor))
+        return formula
+    def __call__(self,formula=None):   #devuelve el resultado evaluado
+            if formula:
+                self._expresion=self.expresion(formula)
+            try:
+                return eval(self._expresion)
+            except:
+                sys.exc_info()[0]
+            return None
+
+
+""" desarrolla un rango con intervalo float """
+def rango_decimal (rango):
+    def multiplica_Rango(l,f):
+        r=[]
+        for i in l:
+            r+=[int(float(i)*f)]
+        return r
+    def divide_Rango(l,f):
+        r=[]
+        for i in l:
+            r+=[float(i)/f]
+        return r
+    l = rango.split(',')
+    for i in l:
+        if  not is_integer(i): #encuentro algun decimal, así que lo desarrollamos con dcimales
+            l=multiplica_Rango(l,1000)
+            l=range(*l)
+            l=divide_Rango(l,1000)
+            return l
+    l = multiplica_Rango(l, 1) #solo es par pasarlo a entero
+    return range(*l)
+
+
+def botones_back(request,c=None,f='index'):
+    if not c:
+        c=request.controller
+    #boton atrás según si es página normal html o un load
+    backURL=URL(c=c,f=f,vars=request.vars,user_signature=True)
+    if request.extension=='html':
+        return A('', SPAN(_class='icon leftarrow icon-arrow-left glyphicon glyphicon-arrow-left')
+               ,_onclick='window.history.back()',_class='button btn btn-default',cid=request.cid)
+    else:
+        return A('',
+                   SPAN(_class='icon leftarrow icon-arrow-left glyphicon glyphicon-arrow-left')
+               ,_href=backURL,_class='button btn btn-default',cid=request.cid)
+#FUNCIONES BASICAS
+
+def valNum(var):
+    try: return float(var)
+    except: return 0
+
+def valStr(var):
+    return '' if var is None else var
+
+def grid_headers_align(fields):
+    headers={}
+    for  f in fields:
+        namefield=f.__str__()
+        label=f.label
+        if namefield.startswith('AVG('): label=T(namefield)
+        if f.type.startswith('decimal') or f.type=='integer' :
+            headers[namefield]=DIV(label, _style='text-align: right;')
+            #raise HTTP(404,f.label)
+    return headers
+
+
+"""
+    combina los atributos de los componentes de un modulo o configuracion para rehacer la lista de atributos del modulo padre o configuracion
+    id_deleted=id de un mod_mod_atr que se va a eliminar, para obviarlo y no incluirlo
+"""
+
+def recolectar_atributos_modulo(id,t_cmp,id_modcmp_del=None,id_modatr_del=None):
+    return
+    db=t_cmp._db
+    t_atr_mod=db.mod_mod_atr #atributos de modulos son los que se buscan y combinan (NUNCA LOS DE CONFIG.)
+    if t_cmp==db.mod_cfg_mod: #componentes de configiuracion
+        field_id_padre='cfg'
+        field_id_cmp='mod'
+        t_atr=db.mod_cfg_atr
+        id_cfl=db.mod_cfg(id)
+        if id_cfl:
+            id_cfl.cfl_base #esto está filtrado porque daba algún error al actualizar modulos, pero no está revisado qué pasa si esto sigue con id_cfl nulo
+    else: #componenes de moodulo
+        field_id_padre='mod'
+        field_id_cmp='cmp_mod'
+        t_atr=t_atr_mod
+    def combina_atributos(atr1,atr2):
+        if atr1['atr']==atr2['atr']:
+            if atr1['tipo']==MOD_ATR_TIPO.valores:
+                atr1['valores']+=( x for x in atr2['valores'] if not x in atr1['valores'])
+                #print '%s %s r:%s' % (atr1['valores'],atr2['valores'],atr['valores'])
+                if not atr1['val_def'] in atr1['valores']:
+                    atr1['val_def']=atr2['val_def']
+                elif len(atr1['valores'])>0:
+                    atr1['val_def']=atr1['valores'][0]
+            else:
+                #atr['rango']  POR AHORA LOS DEJO TAL CUAL EL PRIMERO, PERO HABRA QUE HALLAR UN ALGORITMO QUE PERMITA COMBINAR RANGOS EN MODO ABREVIADO
+                #atr['val_def_formula']
+                pass
+            return atr1
+    atributos=[]
+    atributos_data={}
+    #atributos de módulos componentes
+    fields=[t_atr_mod.atr, t_atr_mod.tipo, t_atr_mod.valores, t_atr_mod.val_def, t_atr_mod.rango, t_atr_mod.val_def_formula]
+    rows=db((t_cmp[field_id_padre]==id) & (t_cmp.id!=id_modcmp_del) & (t_atr_mod.id!=id_modatr_del)).select(*fields ,join=t_atr_mod.on(t_atr_mod.mod==t_cmp[field_id_cmp]))
+    if rows:
+        for x in rows:
+            v=x['atr']
+            if v:
+                if int(v) in atributos:
+                    atributos_data[v]=combina_atributos(atributos_data[v],x.as_dict())
+                else:
+                    atributos.append(int(v))
+                    atributos_data[v]=x.as_dict()
+
+
+    if t_cmp == db.mod_cfg_mod:  # componentes de configuracion base
+        # atributos provinientes de la plantilla de configuracion base
+        fields = [db.mod_cfl_atr.atr, db.mod_cfl_atr.tipo, db.mod_cfl_atr.valores, db.mod_cfl_atr.val_def,
+                  db.mod_cfl_atr.rango,
+                  db.mod_cfl_atr.val_def_formula]
+        rows = db(db.mod_cfl_atr.cfl == id_cfl).select(*fields)
+        if rows:
+            for x in rows:
+                v = x['atr']
+                if v:
+                    if int(v) in atributos:
+                        atributos_data[v] = combina_atributos(atributos_data[v], x.as_dict())
+                    else:
+                        atributos.append(int(v))
+                        atributos_data[v] = x.as_dict()
+
+    #atributos usados en fórmulas de componentes
+    rows=db(t_cmp[field_id_padre]==id).select(t_cmp.formula)
+    if rows:
+        for r in rows:
+            lista=IS_FORMULA.lista_vars(r['formula'])
+            if lista:
+                for v in lista:
+                    if not int(v) in atributos:
+                        atributos.append(int(v))
+    #GUARDAR ATRIBUTOS
+    db((t_atr[field_id_padre]==id) & (t_atr.lock==False)).update(lock=None)
+    if atributos:
+        for ida in atributos:
+            if not ida in atributos_data:
+                atr=db.mod_atr(ida)
+                atributos_data[ida]=dict(tipo=atr.tipo,atr=atr.id,val_def=atr.val_def,val_def_formula=atr.val_def_formula,rango=atr.rango)
+                if atr.tipo==MOD_ATR_TIPO.valores:
+                    v=db.mod_val(db.mod_val.atr==ida)
+                    if hasattr(v,'select'):
+                        v=v.select(fields=db.mod_val.id)
+                        atributos_data[ida]['valores']=(', '.join(i['id'] for i in v))
+                        if not atributos_data[ida]['val_def']:
+                            atributos_data[ida]['val_def']=atributos_data[ida]['valores'][0]
+            atributos_data[ida]['lock']=False
+            for i in ['id','rango_disp','val_def_disp']:
+                if i in atributos_data[ida]: del atributos_data[ida][i]
+            atributos_data[ida][field_id_padre]=id
+            modatr=db((t_atr.atr==ida) & (t_atr[field_id_padre]==id )).select().first()
+            t_atr.update_or_insert((t_atr.atr==ida) & (t_atr[field_id_padre]==id ),**atributos_data[ida])
+            #if modatr:
+            #    modatr.update_or_insert(**atributos_data[ida])
+            #else:
+            #    t_atr.insert(**atributos_data[ida])
+    #finalmente eliminamos los existentes no manuales que no se han tocado
+    s=db((t_atr[field_id_padre]==id) & (t_atr.lock==None))
+    if s.select():
+        s.delete()
+    if t_cmp==db.mod_cmp: #si son componentes de módulo, se repercute hacia los contenederos de este módulo. Si son componentes de cfg, no hace falta
+        recolectar_atributos_ascendientes(id,db)
+
+
+def  recolectar_atributos_ascendientes(id,db,id_modcmp_del=None,id_modatr_del=None):
+    t_cmp=db.mod_cmp
+    for reg in db(db.mod_cmp.cmp_mod==id).select(db.mod_cmp.mod):
+        recolectar_atributos_modulo(reg.mod,t_cmp,id_modcmp_del=id_modcmp_del,id_modatr_del=id_modatr_del)
+    for reg in db(db.mod_cfg_mod.mod==id).select(db.mod_cfg_mod.cfg):
+        recolectar_atributos_modulo(reg.cfg,db.mod_cfg_mod,id_modcmp_del=id_modcmp_del,id_modatr_del=id_modatr_del)
+"""
+Busca recursivamente si mod_id es ancestro de mod_padre
+"""
+
+
+def mod_es_ancestro(db,mod_id,mod_padre):
+    rows=db((db.mod_cmp.cmp_mod==mod_padre)&(db.mod_cmp.cmp_tipo==MOD_CMP_TIPO.modulo)).select(db.mod_cmp.mod)
+    if rows:
+        for r in rows:
+            if r.mod==mod_id:
+                return True
+            else:
+                if mod_es_ancestro(db,mod_id,r.mod):
+                    return True
+"""
+Busca recursivamente si mod_id es descendiente de mod_hijo
+"""
+
+
+def mod_es_descendiente(db,mod_id,mod_hijo):
+    rows=db((db.mod_cmp.mod==mod_hijo)&(db.mod_cmp.cmp_tipo==MOD_CMP_TIPO.modulo)).select(db.mod_cmp.cmp_mod)
+    if rows:
+        for r in rows:
+            if r.cmp_mod==mod_id:
+                return True
+            else:
+                if mod_es_descendiente(db,mod_id,r.cmp_mod):
+                    return True
+
+def monta_descripcion_modulo(db,reg_or_id):
+    from gluon.dal import Row
+    if  isinstance(reg_or_id, Row):
+        reg=reg_or_id
+    else:
+        reg=db.mod[reg_or_id]
+    campos=[db.mod_mod_atr.valores, db.mod_atr.abreviatura]
+    # & (db.mod_mod_atr.lock==True)   # añadir lock si solo se quieren los atributos manuales y no los heredados
+    rows=db((db.mod_mod_atr.mod==reg['id'])).select(*campos,left=db.mod_atr.on(db.mod_mod_atr.atr==db.mod_atr.id),orderby=~db.mod_atr.orden_descripcion)
+    des='' if reg['name_fix'] else db.mod_tipos[reg['tipo']].abreviatura + ' '
+    if rows:
+        for r in rows:
+            if r.mod_mod_atr.valores:
+                if len(r.mod_mod_atr.valores)==1:
+                    vreg=db.mod_val(r.mod_mod_atr.valores[0])
+                    des+=r.mod_atr.abreviatura % (vreg.abreviatura or vreg.name) +' '
+    if reg['name_fix']:
+        if '%s' in reg['name_fix']:
+            des=reg['name_fix'] % (des)
+        else:
+            des = reg['name_fix']
+    return des.strip(' ')
+
+def recolectar_atributos_presupuesto(db,id_pre):
+    id_cfg=db.mod_pre(id_pre).cfg
+    rows=db(db.mod_cfg_atr.cfg==id_cfg).select()
+    if rows:
+        for row in rows:
+            db.mod_pre_atr.update_or_insert((db.mod_pre_atr.pre==id_pre) & (db.mod_pre_atr.atr==row.atr),
+                                           pre=id_pre, atr=row.atr, valor=row.val_def or row.val_def_formula, )
+
+def options_widget_mod(field,value,row,**kwargs):
+    from gluon.sqlhtml import OptionsWidget
+    db=field._db
+    cadena=None
+    if field is db.mod_pre_atr.valor:
+        value=str(Formula_Pre(db,db.mod_pre_atr(row['id']).pre,value)())
+        cadena=options_mod_pre_atr(db, row['id'])
+        if cadena:
+            return SQLFORM.widgets.string.widget(field,value,**kwargs)
+        else:
+            return OptionsWidget.widget(field, value,**kwargs)
+
+def field_sort_widget(field,value,row,orden='',**kwargs):
+    wg=SQLFORM.widgets.string.widget(field, value, **kwargs)
+    fh='inc-%s_row_%s' % (field.name,row['id'])
+    js = '$("[name=%(fh)s]").val("%(signo)s"); $("form").submit();'
+    wg=SPAN([wg,A(_class='input-group-addon icon glyphicon glyphicon-arrow-up',_onclick=js % dict(fh=fh,signo=('-' if orden!='~' else '+') )),
+                A(_class='input-group-addon icon glyphicon glyphicon-arrow-down',_onclick=js % dict(fh=fh,signo=('+' if orden!= '~' else '-'))),
+                INPUT(_type='hidden', _name= fh, _value='')],
+            _class='input-group')
+    return wg
+
+def options_mod_pre_atr(db,idreg):
+    reg = db.mod_pre_atr[idreg]
+    if reg:
+        idcfg = db.mod_pre(reg.pre).cfg
+        rango = db((db.mod_cfg_atr.atr == reg.atr) & (db.mod_cfg_atr.cfg == idcfg)).select(db.mod_cfg_atr.valores,
+                                                                                           db.mod_cfg_atr.rango)
+        if rango:
+            atr_cfg = rango.first()
+            if reg.atr.tipo == MOD_ATR_TIPO.valores:
+                db.mod_pre_atr.valor.requires = IS_IN_DB(db(db.mod_val.id.belongs(atr_cfg.valores)), db.mod_val.id,
+                                                         '%(name)s', orderby='mod_val.name')
+            else:
+                if atr_cfg.rango:
+                    formula = Formula_Pre(db, reg.pre)
+                    rango=[str(formula(i)) for i in atr_cfg.rango.split(',')]
+                    lista=rango_decimal(','.join(rango))
+                    lista=[(i,'%s %s' % (i,reg.atr.um.cod_SI)) for i in lista]
+                    db.mod_pre_atr.valor.requires = IS_IN_SET(lista)
+                else:
+                    return True #no hay options, habra que usar string
+
+
+def modrul_lanza(db,idrul):
+    def add_or_update_cmp(mod,cmp,formula):
+        if formula!=None:
+            setr=db((db.mod_cmp.cmp_pie==cmp)&(db.mod_cmp.cmp_tipo==MOD_CMP_TIPO.pieza)&(db.mod_cmp.mod==mod))
+            row=setr.select().first()
+            if row:
+                if str(formula)[0] in '-+/*':
+                    valor='float('+row.formula+')'+str(formula)
+                else:
+                    valor=formula
+                try:
+                    valor=eval(valor)
+                except:
+                    pass
+                if str(valor)=='0' or str(valor)=='0.0':
+                    setr.delete()
+                else:
+                    row.update_record(formula=valor)
+            else:
+                try:
+                    valor=eval(formula)
+                except:
+                    valor=formula
+                if str(valor)!='0' and str(valor)!='0.0':
+                    db.mod_cmp.insert(mod=mod,cmp_pie=cmp,cmp_tipo=MOD_CMP_TIPO.pieza ,formula=valor)
+    rul=db.mod_rul(idrul)
+    if not rul:
+        return 'regla %s no existe' % idrul
+    sel=(db.mod.name.like(rul.filtro_descripcion)) &(db.mod.id==db.mod_cmp.mod)& (db.mod_cmp.cmp_pie==db.mod_rul_lin.cmp_pie_trg)
+    sel=sel & ( db.mod_rul_lin.mod_rul==idrul)
+    rows=db(sel).select(db.mod_cmp.mod,db.mod_rul_lin.cmp_pie_trg,db.mod_cmp.formula,db.mod_rul_lin.cmp_pie_tar,
+                        db.mod_rul_lin.formula_trg,db.mod_rul_lin.formula_tar)
+    
+    for r in rows:
+        valororigen = r.mod_cmp.formula
+        atrdict = {str(ATR_ESPECIAL.PZORIGEN): [MOD_ATR_TIPO.formula,valororigen]}
+        expresion=r.mod_rul_lin.formula_tar
+        formula = Formula(db,atrdict,expresion)  #cargo calulo formula con atributos
+        cantidad=formula()
+        add_or_update_cmp(r.mod_cmp.mod,r.mod_rul_lin.cmp_pie_tar,cantidad) #sumo a target
+        #modifico pieza origen
+        if r.mod_rul_lin.formula_trg!=None:
+            cantidad=formula(r.mod_rul_lin.formula_trg)
+            add_or_update_cmp(r.mod_cmp.mod, r.mod_rul_lin.cmp_pie_trg, cantidad)  # afecto a orgien
+    return 'Filtro aplicado correctamente'

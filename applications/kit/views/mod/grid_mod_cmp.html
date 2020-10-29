@@ -1,0 +1,23 @@
+{{extend 'layout.html'}}
+{{if 'botones' in globals():}}
+<table width='100%'><tr><td width='90%'><h1><span></span></h1></td><td width='10%' align='right'>{{=botones}}</td></tr></table>
+{{pass}}
+
+{{=grid}}
+
+{{if formcopia:}}
+    <div class='row'>
+        <div class='col-lg-12 col-lg-offset-2'>
+            <hr>
+        </div>
+    </div>
+    <div class="container col-md-10">
+        {{=formcopia.custom.begin}}
+        <div class="form-group row" id="pr_row">
+            <label class="control-label col-sm-2">{{=formcopia.custom.label.copymod}}</label>
+            <div class="col-sm-4">{{=formcopia.custom.widget["copymod"]}}</div>
+            <div class="col-sm-2">{{=formcopia.custom.submit}} </div>
+        </div>
+        {{=formcopia.custom.end}}
+    </div>
+{{pass}}

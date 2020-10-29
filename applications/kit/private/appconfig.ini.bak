@@ -1,0 +1,30 @@
+; App configuration
+
+; db configuration
+[db]
+uri       = mssql3://inverwin:osiris@server/inver3
+migrate   = true
+pool_size = 1
+
+; smtp address and credentials
+[smtp]
+server = smtp.inverca.es:587
+sender =jbs@inverca.es
+login  = inverca:inverwin1980
+admin_address = jbs@inverca.es
+tls = True
+ssl = False
+
+; form styling
+[forms]
+formstyle = bootstrap3_inline
+separator =
+
+[paths]
+docsprov=\\server\invifile\proveedores
+docscargas=\\server\invifile\cargas
+docs=\\server\invifile\doc\actual
+docplanos=\\server\design\piezas
+forms=static\forms
+pdftk=e:\web2py\pdftk\bin\pdftk.exe
+form_recepcion=FP04.02.PDF

@@ -1,0 +1,975 @@
+# -*- coding: utf-8 -*-
+if False:
+    from gluon import *
+    from db import *
+    request = current.request
+    response = current.response
+    session = current.session
+    cache = current.cache
+    T = current.T
+# -------------------------------------------------------------------------
+# This scaffolding model makes your app work on Google App Engine too
+# File is released under public domain and you can use without limitations
+# -------------------------------------------------------------------------
+if request.global_settings.web2py_version < "2.14.1":
+    raise HTTP(500, "Requires web2py 2.13.3 or newer")
+
+# -------------------------------------------------------------------------
+# if SSL/HTTPS is properly configured and you want all HTTP requests to
+# be redirected to HTTPS, uncomment the line below:
+# -------------------------------------------------------------------------
+# request.requires_https()
+
+# -------------------------------------------------------------------------
+# app configuration made easy. Look inside private/appconfig.ini
+# -------------------------------------------------------------------------
+from gluon.contrib.appconfig import AppConfig
+from basic import *
+from gluon.debug import dbg
+import datetime
+from basic_custom import GRAL
+
+# -------------------------------------------------------------------------
+# once in production, remove reload=True to gain full speed
+# -------------------------------------------------------------------------
+myconf = AppConfig(reload=True)
+
+if not request.env.web2py_runtime_gae:
+    # ---------------------------------------------------------------------
+    # if NOT running on Google App Engine use SQLite or other DB
+    # ---------------------------------------------------------------------
+    db = DAL(myconf.get('db.uri'),
+             pool_size=myconf.get('db.pool_size'),
+             migrate_enabled=myconf.get('db.migrate'),fake_migrate_all=True, lazy_tables=True,
+             check_reserved=['common'],db_codec='latin1')
+else:
+    # ---------------------------------------------------------------------
+    # connect to Google BigTable (optional 'google:datastore://namespace')
+    # ---------------------------------------------------------------------
+    db = DAL('google:datastore+ndb')
+    # ---------------------------------------------------------------------
+    # store sessions and tickets there
+    # ---------------------------------------------------------------------
+    session.connect(request, response, db=db)
+    # ---------------------------------------------------------------------
+    # or store session in Memcache, Redis, etc.
+    # from gluon.contrib.memdb import MEMDB
+    # from google.appengine.api.memcache import Client
+    # session.connect(request, response, db = MEMDB(Client()))
+    # ---------------------------------------------------------------------
+    session.auth.expiration=3600*3
+# -------------------------------------------------------------------------
+# by default give a view/generic.extension to all actions from localhost
+# none otherwise. a pattern can be 'controller/function.extension'
+# -------------------------------------------------------------------------
+response.generic_patterns = ['*'] if request.is_local else []
+# -------------------------------------------------------------------------
+# choose a style for forms
+# -------------------------------------------------------------------------
+response.formstyle = myconf.get('forms.formstyle')  # or 'bootstrap3_stacked' or 'bootstrap2' or other
+response.form_label_separator = myconf.get('forms.separator') or ''
+
+# -------------------------------------------------------------------------
+# (optional) optimize handling of static files
+# -------------------------------------------------------------------------
+# response.optimize_css = 'concat,minify,inline'
+# response.optimize_js = 'concat,minify,inline'
+
+# -------------------------------------------------------------------------
+# (optional) static assets folder versioning
+# -------------------------------------------------------------------------
+# response.static_version = '0.0.0'
+
+# -------------------------------------------------------------------------
+# Here is sample code if you need for
+# - email capabilities
+# - authentication (registration, login, logout, ... )
+# - authorization (role based authorization)
+# - services (xml, csv, json, xmlrpc, jsonrpc, amf, rss)
+# - old style crud actions
+# (more options discussed in gluon/tools.py)
+# -------------------------------------------------------------------------
+
+from gluon.tools import Auth, Service, PluginManager
+from plugin_lazy_options_widget import lazy_options_widget
+
+# host names must be a list of allowed host names (glob syntax allowed)
+auth = Auth(db, host_names=myconf.get('host.names'))
+service = Service()
+plugins = PluginManager()
+
+auth.settings.extra_fields[auth.settings.table_user_name] = [
+    Field('desactivado','boolean',writable=False,readable=False),
+    Field('language_code',length=5,default=T.accepted_language,requires=IS_IN_SET(T.get_possible_languages())),
+    ]
+
+
+# -------------------------------------------------------------------------
+# create all tables needed by auth if not custom tables
+# -------------------------------------------------------------------------
+auth.define_tables(username=True, signature=False)
+
+# -------------------------------------------------------------------------
+# configure email
+# -------------------------------------------------------------------------
+mail = auth.settings.mailer
+mail.settings.server = 'logging' if request.is_local else myconf.get('smtp.server')
+mail.settings.sender = myconf.get('smtp.sender')
+mail.settings.login = myconf.get('smtp.login')
+mail.settings.tls = myconf.get('smtp.tls') or False
+mail.settings.ssl = myconf.get('smtp.ssl') or False
+
+# -------------------------------------------------------------------------
+# configure auth policy
+# -------------------------------------------------------------------------
+auth.settings.registration_requires_verification = False
+auth.settings.registration_requires_approval = False
+auth.settings.reset_password_requires_verification = True
+
+# -------------------------------------------------------------------------
+# Define your tables below (or better in another model file) for example
+#
+# >>> db.define_table('mytable', Field('myfield', 'string'))
+#
+# Fields can be 'string','text','password','integer','double','boolean'
+#       'date','time','datetime','blob','upload', 'reference TABLENAME'
+# There is an implicit 'id integer autoincrement' field
+# Consult manual for more options, validators, etc.
+#
+# More API examples for controllers:
+#
+# >>> db.mytable.insert(myfield='value')
+# >>> rows = db(db.mytable.myfield == 'value').select(db.mytable.ALL)
+# >>> for row in rows: print row.id, row.myfield
+# -------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------
+# after defining tables, uncomment below to enable auditing
+# -------------------------------------------------------------------------
+# auth.enable_record_versioning(db)
+
+from plugin_selectplus import SelectOrAddOption, AutocompleteWidgetSelectOrAddOption, SelectTreeWidget
+from basic  import Compute_lazy
+from basic_custom import *
+from custom import *
+#funciones comunes para validaciones
+
+#PRODUCTOS,
+db.define_table('productos',
+   Field('id','id',rname='id_pieza'),
+   Field('codigo',rname='cod_pie',label='Codigo',length=8,requires=IS_NOT_EMPTY()),
+   Field('name',rname='descri',label='Descripción',length=80),
+   Field('kg_real','float'),
+   Field('origen','integer'),
+   Field('piezasembalaje','int'),
+   Field('idembalaje','integer'),
+   Field('idembalajeprincipal','integer'),
+   Field('cod_uni','sting'),
+   format=lambda r: r.name if r else "",singular='Pieza',plural='Piezas',migrate=False
+ )
+
+#Tablas no migrables, se definen los campos que interesan
+SQL_TIME_FORMAT="%Y%m%d %H:%M:%S"
+           
+#IDIOMAS
+db.define_table('idiomas',
+   Field('id_idioma','id'),
+   Field('name',rname='DesIdioma',label=T('Idioma'),length=30,requires=IS_NOT_EMPTY()),
+   Field('iso_code',rname='Codigo2',length=2,requires=IS_NOT_EMPTY()),
+    format=lambda r: r.name,singular='Idioma',plural='Idiomas',
+    migrate=False)
+#Tablas CARGAS/ALMACEN
+db.define_table("varios",
+               Field('id','id'),
+               Field('name','string',rname='desvar'),
+               Field('tipo','integer',rname='tipvar'),
+               Field('numvar','integer'),
+               rname='ficvar',migrate=False)
+#cargas
+#vista de cargas
+db.define_table('cargas',
+                Field('id','id'),
+                Field('fecha','date',requires=IS_DATE(),represent = lambda value, row: value.strftime('%d/%m/%Y') if value else ''),
+                Field('ordencarga','integer'),
+                Field('transportista','string'),
+                Field('serie','string'),
+                Field('pedido','integer',rname='numero'),
+                Field('ruta','string'),
+                Field('estado','integer'),
+                Field('cliente','string'),
+                Field('proyecto','string'),
+                Field('kgcargadas','float'),
+                Field('kgprep','float'),
+                Field('kgptecarga','float'),
+                Field('kgptecarga','float'),
+                Field('kgbrutos','float'),
+                Field('bultoscargados','integer'),
+                Field('totalbultos','integer'),
+                Field("ordfab",'integer'),
+                rname='vista_cargas', migrate=False,singular='Carga',plural='Cargas')
+
+db.define_table("vista_cargas_piezas",
+               Field('pedido','integer',rname='numero'),
+               Field('idpieza','integer',rname='id_pieza'),
+               Field('idcarga','integer',rname='id_carga'),
+               Field('cantidadpreparada','float',rname='uni_prep'),
+               Field('cantidadcargada','float',rname='uni_carga'),
+               Field('cantidadservida','float',rname='uni_ser'), 
+               Field('cantidadpedido','float',rname='uni_pie'),
+               Field('cantidadpendienteservir','float',rname='c_pteservir'),
+               Field('cantidadpendientepreparar','float',rname='c_pteprep'),
+               Field('kg','float'),
+               Field('codigo',rname='cod_pie',label='Codigo',),
+               Field('producto',rname='descri',label='Descripción'),
+               Field('idembalaje','integer'), 
+               primarykey=['idcarga','pedido','idpieza'],
+                rname='Vista_Cargas_Piezas',migrate=False)
+db.define_table("pedidos_carga",
+                Field("id",'id',rname="idcarga"),
+                Field("idcarga",'integer'),
+                Field("serie","string"),
+                Field("pedido",'integer'),rname="vista_pedidos_carga",migrate=False)
+
+db.define_table("vista_bultos",
+               Field('id','id',rname='idbulto'),
+               Field('idcarga','integer',rname='id_carga'),
+               Field('numerobulto','integer'),
+               Field('nitems','integer'),
+               Field('embalaje','string',rname='desembalaje'),
+               Field('pesoembalaje','float'),
+               Field('pesobruto','float'),
+               Field('pesoteorico','float'),
+               Field('estado','string',rname='denestado'),
+               Field('idestado','string',rname='estado'),
+               Field('pedido','integer'),
+               Field('idpieza','integer',rname='id_pieza'),
+               Field('codigo',rname='cod_pie',label='Codigo',),
+               Field('producto',rname='descri',label='Descripción'),
+               rname='vista_bultos_carga', singular='Bulto',plural='Bultos',migrate=False
+ )
+
+db.define_table("cab_bultos",
+                Field('id','id',rname='idbulto',requires=[IS_NOT_EMPTY(),IS_NOT_IN_DB(db,'cab_bultos.id')]),
+                Field('idcarga','integer',rname='id_carga'),
+                Field('numerobulto','integer'),
+                Field('idembalajeprincipal','integer'),
+                Field('pesoembalaje','float',default=0),
+                Field('pesobruto','float',default=0),
+                Field('estado','integer',default=0),
+                Field('pedido','integer',default=0),
+                Field('flagalmacen','integer'),
+                Field('barcode','string',rname='codebar'),
+                Field('fechaalta','datetime',requires=IS_DATETIME()),
+                primarykey=['id'],
+                rname='cab_bultoscargas',singular='Bulto',plural='Bultos',migrate=False
+ )
+db.define_table("lin_bultos",
+                Field('id','id'),
+                Field('idbulto','integer'),
+                Field('idpieza','integer',rname='id_pieza'),
+                Field('cantidad','float'),
+                Field('pedido','integer'),
+                Field('idembalaje','integer'),
+                Field('unidadesembalaje','integer'),
+                Field('pesoneto','float'),
+                Field('pesobruto','float'),
+                Field('UMPieza','string'),
+                Field('bultoratio','float'),
+              rname='lin_bultoscargas',singular='Linea Bulto',plural='Lineas Bulto',migrate=False
+ )
+db.define_table("vista_lineas_bulto",
+                Field('id','id'),
+                Field('idbulto','integer'),
+                Field('idpieza','integer',rname='id_pieza'),
+                Field('cantidad','float'),
+                Field('pedido','integer'),
+                Field('idembalaje','integer'),
+                Field('unidadesembalaje','integer'),
+                Field('pesoneto','float'),
+                Field('pesobruto','float'),
+                Field('codigo','string',rname='cod_pie'),
+                Field('producto','string',rname='descri'),
+              rname='vista_lineas_bulto',singular='Linea Bulto',plural='Lineas Bulto',migrate=False
+ )
+
+db.define_table('productos_stock',
+    Field('codigo',rname='cod_pie',label='Codigo',length=20,requires=IS_NOT_EMPTY()),
+    Field('name',rname='descri',label='Descripción',length=80),
+    Field('id_pieza','id'),
+    Field('kgud','float'),
+    Field('piezasembalaje','integer'),
+    Field('stock_min','float'),
+    Field('stock','float'),
+    Field('stkdis','float'),
+    Field('um','string'),
+    Field('stkumcompra','float'),
+    Field('codumcompra','string'),
+    Field('umcompra','string'),
+    Field('stkumfacturacion','float'),
+    Field('codumfacturacion','string'),
+    Field('umfacturacion','string'),
+    Field('cod_uni','string'),
+
+   format=lambda r: r.name if r else "",rname='vista_productos',
+                singular='Pieza',plural='Piezas',migrate=False
+ )
+db.define_table('productos_mov',
+    Field('id','id',rname='idmov'),
+    Field('codigo',rname='cod_pie',label='Codigo',length=20,requires=IS_NOT_EMPTY()),
+    Field('name',rname='descri',label='Descripción',length=80),
+    Field('id_pieza','integer'),
+    Field('fechahora','datetime',rname='fecha'),
+    Field('entradas','float'),
+    Field('salidas','float'),
+    Field('tipo','string'),
+    Field('stock','float'),
+    Field('ordfab','integer'),
+    Field('observaciones','string'),
+   format=lambda r: r.name if r else "",rname='Vista_Productos_Movimientos',
+                   singular='Movimients',plural='Movimientos',migrate=False
+ )
+db.define_table('productos_mov0',
+    Field('id','id',rname='clave'),
+    Field('id_pieza','integer'),
+    Field('fechahora','datetime'),
+    Field('tipo','integer'),
+    Field('fecha','date'),
+    Field('cantidad','float'),
+    Field('codemp','integer'),
+    Field('codalmacen','integer'),
+    Field('cantidadum','float'),
+    Field('unidadmedida','integer'),
+    Field('observaciones','string'),
+    Field('usuari','integer'),
+     rname='productos_mov',
+                singular='Movimients',plural='Movimientos',migrate=False
+ )
+#Formularios Inspeccion
+db.define_table('formularioscampos',
+    Field('idformulario','integer'),
+    Field('pagina','integer'),
+    Field('clave','string'),
+    Field('linea','integer'),
+    Field('etiqueta','string'),
+    Field('observaciones','string'),
+    Field('columna','integer'),
+    Field('valorpredeterminado','string'),
+    Field('valores','string'),
+                singular='Campo formulario',plural='Campos formularios',migrate=False
+ )
+#Tablas PRODUCCION
+class CODIGOSTALLER:
+    piezaComodin='ZTALLER'
+    piezaTrabajosComplementarios='ZTCOMP'
+    codigoCargas='9000006'
+    codigoDescargas='9000009'
+    ordfabComodin=1
+
+class CODIGOSTALLER2:
+    piezaComodin='ZTALLER'
+    ordfabComodin=1
+    codigos=[{'id':'9000006','name':'Cargar'},
+              {'id':'9000009','name':'Descargar'},
+              {'id':'9000007','name':'Limpieza'},
+              {'id':'9000025','name':'Incidencia'},
+              {'id':'9000011','name':'Mantenimiento'}]
+
+
+class ESTADOS_ORDFAB:
+    pendiente=2501
+    abierta=2502
+    cerrada=2503
+    pausada=2507
+    parcial=2508
+    anulada=2509
+class ACTIVIDADES:
+    preparacion=1
+    fabricacion=2
+
+db.define_table('trabajosvarios',
+   Field('id','id',rname='cod_pri'),
+   Field('name',rname='descri'),
+    migrate=False)
+
+db.define_table('maquinas',
+   Field('id','id',rname='idmaquina'),
+   Field('name',rname='maquina',requires=IS_NOT_EMPTY()),
+    format=lambda r: r.name,singular='Máquina',plural='Máquinas',
+    migrate=False)
+
+db.define_table('actividades',
+   Field('id','id',rname='idactividad'),
+   Field('name',rname='actividad',requires=IS_NOT_EMPTY()),
+    format=lambda r: r.name,singular='Actividad',plural='Actividades',
+    migrate=False)
+
+db.define_table('operarios',
+   Field('id','id',rname='idempleado'),
+   Field('name',rname='nombrecompleto',requires=IS_NOT_EMPTY()),
+   Field('codigoseccion','string'),
+   Field('presente','integer'),
+   Field('partesactivo','integer'),
+    format=lambda r: r.name,singular='Operario',plural='Operarios',
+    migrate=False)
+
+#tabla de entregas para actualizar
+db.define_table('entregas0',
+                Field('id','id',rname='numero'),
+                Field('estado','integer'),
+                rname='Entregas_tab', migrate=False,singular='Nota de Entrega',plural='Notas de Entrega')
+#vista de entegas
+db.define_table('entregas',
+                Field('id','id',rname='numero'),
+                Field('fecha','date',requires=IS_DATE(),represent = lambda value, row: value.strftime('%d/%m/%Y') if value else ''),
+                Field('producto','string'),
+                Field('cantidad','integer'),
+                Field('operario','string'),
+                Field('nif','string'),
+                Field('firmada','integer'),
+                rname='Entregas', migrate=False,singular='Nota de Entrega',plural='Notas de Entrega')
+
+db.define_table('ordfab',
+                Field('id','id',rname='ordfab'),
+                Field('fecha','date'),
+                Field('idestado','integer',rname='estado'),
+                Field('estado','string',rname='denestado'),
+                Field('obra','string'),
+                Field('pedido','integer'),
+                Field('idproyecto','integer'),
+                Field('proyecto','string'),
+                rname='Vista_Ordfab', migrate=False,singular='Orden Fabricacion',plural='Órdenes de Fabricación')
+
+#Vista de OT's con todos los datos
+db.define_table('ot',
+                Field('id','id',rname='ordtra'),
+                Field('ordfab',db.ordfab),
+                Field('idpieza',db.productos,rname='ID_PIEZA'),
+                Field('codigopieza','string',rname='COD_PIE'),
+                Field('pieza','string',rname='DESCRIPCIONPIEZA'),
+                Field('codigotrabajo','string',rname='codigo'),
+                Field('trabajo','string'),
+                Field('observaciones','string'),
+                Field('cantidad','integer'),
+                Field('idmaquina',db.maquinas),
+                Field('maquina','string'),
+                Field('idestado','integer'),
+                Field('estado','string'),
+                Field('numoperarios','integer',rname='noperarios'),
+                Field('barcode','string',rname='codebar'),
+                Field('inicio','datetime'),
+                Field('idactividad',db.actividades),
+                Field('actividad','string'),
+                Field('flagplano','string'),
+                Field('coddoc','string'),
+                Field('canfab','integer'), #columna a quitar cuando todos terminales actualizados 11/7/2018
+                Field('totcanfab','integer'),
+                Field('flag_preparacion','integer'), #un uno si puede llevar preparacion, 0 si no
+                rname='Vista_Trabajos', migrate=False,singular='Orden Trabajo',plural='Órdenes de Trabajo')
+#Tabla de OT's actualizable
+db.define_table('ot0',
+                Field('id','id',rname='ordtra'),
+                Field('ordfab',db.ordfab),
+                Field('idpieza',db.productos,rname='ID_PIEZA'),
+                Field('observaciones','string'),
+                Field('cantidad','integer',rname='canord'),
+                Field('maquina',db.maquinas,rname='idmaquina'),
+                Field('barcode','string',rname='codebar'),
+                Field('estado','integer'),
+                Field('orden','integer'),
+                Field('numoperarios','integer'),
+                rname='Cab_OrdTra', migrate=False)
+db.define_table('ot_lin_prg',
+                Field('ot',db.ot,rname='Ordtra'),
+                Field('operario',db.operarios,rname='idoperario'),
+                Field('estado','integer',rname='idestado'),
+                Field('inicio','datetime',requires=IS_DATETIME()),
+                Field('equipo','integer'),
+                Field('idmaquina','integer'),
+                Field('maquina','string'),
+                rname='Vista_trabajos_prg',migrate=False)
+db.define_table('ot_lin',
+                 Field('id','id',rname='idLinOrdTra'),
+                 Field('ot',db.ot,rname='OrdTra'),
+                 Field('operario',db.operarios,rname='idOperario',requires=IS_IN_DB(db,db.operarios,'%(name)s',orderby='name')),
+                 Field('maquina',db.maquinas,rname='idMaquina',requires=IS_IN_DB(db,db.maquinas,'%(name)s',orderby='name')),
+                 Field('actividad',db.actividades,rname='idactividad',requires=IS_IN_DB(db,db.actividades,'%(name)s',orderby='name')),
+                 Field('inicio','datetime',requires=IS_DATETIME()),
+                 Field('fin','datetime',requires=IS_NULL_OR(IS_DATETIME())),
+                 Field('tiempoefectivo','float'),
+                 Field('canfab', 'float'),
+                 Field('porcentaje', 'float'),
+                 Field('observaciones','text'),
+                 Field('noperarios','integer'),
+                 Field('estado','integer',default=6301),
+                 Field('asignado','datetime'),
+                 Field('fechaproduccion','date'),
+                 rname='ot_lin', migrate=False,singular='Movimiento de OT',plural='Movimientod de OT')
+db.define_table('materias_ordfab',
+                Field('ordfab','integer'),
+                Field('pieza','integer',rname='id_pieza'),
+                Field('materia','integer',rname='id_materia'),
+                Field('codigomateria','string',rname='codigo'),
+                Field("descripcionmateria",'string',rname='materia'),
+                Field('cantidad','float',rname='uni_pri'),
+                Field('um','string',rname='um'),
+                Field("consumida","datetime"),
+                Field("cambiada","datetime"),
+                rname='Vista_Materias_Ordfab', migrate=False)
+db.define_table('materias_parte',
+                Field('linordtra','integer'),
+                Field('pieza','integer',rname='id_pieza'),
+                Field('materia','integer',rname='id_materia'),
+                Field('materia_consumir','integer',rname='id_materia_consumir'),
+                rname='fintecpi_linordtra', migrate=False)
+db.define_table('pedpro',
+                Field('id','id'),
+                Field('pedido','integer'),
+                Field('fecha','date'),
+                Field('proveedor','string'),
+                Field('idproveedor','integer'),
+                Field('codigo','string'),
+                Field('producto','string'),
+                Field('observaciones','string'),
+                Field('cantidad','float'),
+                Field('cantidadpendiente','float'),
+                Field('cantidadumcompra','float'),
+                Field('umcompra','string'),
+                Field('um','string'),
+                Field('estado','string'),
+                Field('idestado','integer'),
+                rname='Vista_PedPro', migrate=False)
+db.define_table('albpro',
+                Field('id','id',rname='numero'),
+                Field('fecha','date'),
+                Field('idproveedor','integer',rname='cod_proveedor'),
+                Field('albaran','string',rname='refproveedor'),
+                Field('hojainspeccion','string',rname='hojainspeccion'),
+                rname='Cab_AlbPro', migrate=False)
+#Tablas propias
+#Unidades de Medida
+db.define_table('mod_um',
+   Field('name',label=T('U.Medida'),length=30,requires=IS_NOT_EMPTY()),
+   Field('cod_SI',label=T('Abreviatura'),length=10,requires=IS_NOT_EMPTY()),
+   Field('main_um','integer',label='UM Principal'),
+   Field('factor','float'),
+   format=lambda r: r.name if r else "",singular='Unidad de medida',plural='Unidades de medida')
+db.mod_um.main_um.requires=IS_EMPTY_OR(IS_IN_DB(db,db.mod_um,'%(name)s',orderby='name'))
+db.mod_um.main_um.represent=lambda val,registro: '' if val is None else (db.mod_um(val).name or 'Missing')
+#db.mod_um.main_um.widget=SelectOrAddOption(db.mod_um)
+db.mod_um.factor.show_if = (db.mod_um.main_um !='')
+
+
+### Tablas jerárquicas #########################################################
+from plugin_mptt import MPTT
+mptt = MPTT(db)
+mptt.settings.table_node_name = 'mod_tipos'
+mptt.settings.extra_fields = {
+    mptt.settings.table_node_name :
+        [Field('name'),
+         Field('node_type'),
+         Field('abreviatura',length=50,compute=lambda r: r['name'][0:50]),
+         Field('created_on', 'datetime', default=request.now)]
+}
+mptt.define_tables()
+db.mod_tipos._plural='Tipos de módulo'
+db.mod_tipos._singular='Tipo de módulo'
+
+
+mptt_atr = MPTT(db)
+mptt_atr.settings.table_node_name = 'mod_grp_atr'
+mptt_atr.settings.extra_fields = {
+    mptt_atr.settings.table_node_name :
+        [Field('name'),
+         Field('node_type'),
+         Field('created_on', 'datetime', default=request.now)]
+}
+mptt_atr.define_tables()
+db.mod_grp_atr._plural='Grupos de atributos'
+db.mod_grp_atr._singular='Grupo de atributos'
+
+from custom import IS_FORMULA, IS_RANGE
+
+atr_id=request.args[-1] if len(request.args) > 1 and not 'new' in request.args else None
+
+######################## MAESTRO DE ATRIBUTOS
+db.define_table('mod_atr',
+                Field('name',length=100,requires=IS_NOT_EMPTY(),label='Descripción'),
+                Field('clave',length=20,requires=IS_NOT_EMPTY(),comment='Nombre usado en fórmulas'),
+                Field('um',db.mod_um,default=1,label='U.Medida',requires=IS_EMPTY_OR(IS_IN_DB(db,db.mod_um,'%(name)s',orderby='name'))),
+                Field('grp_atr',db.mod_grp_atr,label='Grupo',requires=IS_IN_DB(db(db.mod_grp_atr.parent>0),db.mod_grp_atr,'%(name)s',orderby='name')),
+                Field('tipo','string',length=1),
+                Field('val_def','integer',label='Valor predet.'),
+                Field('val_def_formula','string',length=100,label='Fórmula predet.'),
+                Field('rango','string',length=50,comment='Formato: "min,max,inc". Ej: desde 2.5 hasta 300, cada 2.5: "2.5,300,2.5"') ,
+                Field('abreviatura',length=10,requires=IS_NOT_EMPTY(),comment='Usada para construir descripcion de módulo. Escribir "%s" para indicar la posición del valor'),
+                Field('orden_descripcion','integer',label='Orden',comment="0-999 donde 999 es el primero"),
+                Field('visibilidad','string',length=100,label='Visibilidad',comment='Fórmula que debe devolver verdadero o falso, ej: [abc]',default=1),
+                format=lambda r: r.name,singular='Atributo',plural='Atributos')
+db.mod_atr.clave.widget=Input_compute_in_form('$("#mod_atr_name").val().substring(0,%s).replace(/ /g,"_")' % db.mod_atr.clave.length)
+db.mod_atr.abreviatura.widget=Input_compute_in_form('($("#mod_atr_name").val()) ? $("#mod_atr_name").val().substring(0,3)+"%s" : ""' )
+db.mod_atr.grp_atr.represent=lambda v,r: db.mod_grp_atr(v).name if v else ''
+db.mod_atr.val_def_formula.requires=IS_EMPTY_OR(IS_FORMULA(db,db.mod_atr.clave,current_atr_id=atr_id))
+db.mod_atr.visibilidad.requires=IS_EMPTY_OR(IS_FORMULA(db,db.mod_atr.clave,current_atr_id=atr_id))
+db.mod_atr.rango.requires=IS_EMPTY_OR(IS_RANGE(db,db.mod_atr.clave))
+db.mod_atr.val_def_formula.represent=lambda v,r: IS_FORMULA.formatea(db,v,db.mod_atr.clave)
+db.mod_atr.rango.represent=lambda v,r: IS_RANGE.formatea(db,v,db.mod_atr.clave)
+db.mod_atr.val_def_formula.widget=AutocompleteWidgetSelectOrAddOption(request, db.mod_atr.clave, form_title='',keyword='mod_atr_val_def_formula',min_length=1,multi=True,add_option=False, orderby='clave')
+db.mod_atr.visibilidad.widget=AutocompleteWidgetSelectOrAddOption(request, db.mod_atr.clave, form_title='',keyword='mod_atr_visibilidad',min_length=1,multi=True,add_option=False, orderby='clave')
+#Tablas de valores fijas en memoria
+from custom import MOD_ATR_TIPO ,  MOD_CMP_TIPO
+db.mod_atr.tipo.requires=IS_IN_SET(MOD_ATR_TIPO().getitems(),zero=None)
+db.mod_atr.rango.show_if=(db.mod_atr.tipo!=MOD_ATR_TIPO.valores)
+db.mod_atr.val_def.show_if=(db.mod_atr.tipo==MOD_ATR_TIPO.valores)
+db.mod_atr.val_def_formula.show_if=(db.mod_atr.tipo!=MOD_ATR_TIPO.valores)
+db.mod_atr.val_def.represent=lambda v,r: db()
+
+########################## MAESTROS DE VALORES DE ATRIBUTOS
+db.define_table('mod_val',
+                Field('atr',db.mod_atr,requires=IS_IN_DB(db,db.mod_atr,'%(name)s',orderby='name')),
+                Field('valor','string',length=50,requires=IS_NOT_EMPTY(),comment='Valor a usar en cálculos en fórmulas'),
+                Field('name',label=T('Descripción'),length=100,requires=IS_NOT_EMPTY()),
+                Field('abreviatura','string',length=15),
+                format=lambda r: r.name + db.mod_atr(r.mod_atr).um, singular='Valor',plural='Valores')
+if 'mod_val' in request.args:
+    if 'mod_atr_id' in request.vars:
+          db.mod_val.name.widget=Input_compute_in_form('$("#mod_val_valor").val()+" %s"' % db.mod_um(db.mod_atr(request.vars.mod_atr_id).um).cod_SI)
+
+#db.mod_val._before_insert.append( lambda r: record_validator(db.mod_val,r))
+#db.mod_val._before_update.append( lambda s,r:record_validator(db.mod_val,r,s.select()[0]))
+
+#campos de atributos que depende de la tabla valores y los amplio ahora en sus definiciones
+#db.mod_atr.val_def_disp.compute=lambda r: db.mod_atr.val_def_formula.represent(r['val_def_formula'],r) if r['tipo']!=MOD_ATR_TIPO.valores else (db.mod_val(r['val_def']).name if  r['val_def'] else '')
+#como la lista de valores la queremos filtrada por el atributo en curso, hay que averiguar el id de atributo
+if 'mod_atr' in request.args and not 'new' in request.args:
+    request.vars.mod_atr_id=request.args[-1]
+    db.mod_atr.val_def.requires=IS_EMPTY_OR(IS_IN_DB(db(db.mod_val.atr==request.vars.mod_atr_id), db.mod_val.id,'%(name)s',orderby='mod_val.name'))
+
+db.mod_atr.rango_disp=Field.Virtual(lambda r: (', '.join([val.name for val in db(db.mod_val.atr==r['mod_atr']['id']).select(db.mod_val.name,orderby=db.mod_val.valor)]))
+    if r['mod_atr.tipo']==MOD_ATR_TIPO.valores  else db.mod_atr.rango.represent(r['mod_atr']['rango'],r),label='Rango')
+db.mod_atr.val_def_disp=Field.Virtual(lambda r: db.mod_atr.val_def_formula.represent(r['mod_atr'].val_def_formula,r)
+    if r['mod_atr'].tipo!=MOD_ATR_TIPO.valores else (db.mod_val(r['mod_atr'].val_def).name if  r['mod_atr'].val_def else ''), label="Valor def.")
+db.mod_atr.val_def_disp.length=10
+db.mod_atr.rango_disp.length=30
+
+################################## MODULOS  ############################################
+db.define_table('mod',
+   Field('name',label='Descripción',length=200,writable=False),
+   Field('name_fix',label='Descripción fija',length=200),
+   Field('tipo',db.mod_tipos,label='Tipo',requires=IS_IN_DB(db(db.mod_tipos.parent>0),db.mod_tipos,'%(name)s',orderby='name')),
+   Field('um',db.mod_um,label='U.Medida',default=1,requires=IS_IN_DB(db,db.mod_um,'%(name)s',orderby='name')),
+   format=lambda r: r.name if r else "",singular='Módulo', plural='Módulos')
+db.mod.um.widget=SelectOrAddOption(db.mod_um)
+db.mod.tipo.represent=lambda v,r: db.mod_tipos(v).name if v else ''
+db.mod.name.widget=Compute_lazy(lambda value,trigger,reg: db.mod_tipos(reg['tipo']).name if not reg['name_fix'] else reg['name_fix']  , triggers=[db.mod.name_fix],user_signature=True,visible=True)
+
+#db.mod.name.widget=Input_compute_in_form('$("#mod_name_fix").val()',set_if_null=False)
+
+def mod_after_update(r,s):
+    if s:
+        for reg in s.select():
+            des=monta_descripcion_modulo(db,reg)
+            s.update_naive(name=des)
+            agrega_refresco(db.mod.name,reg['id'],des)
+    return
+#db.mod_cmp._before_insert.append( lambda r: record_validator(db.mod_cmp,r))
+#db.mod_cmp._before_update.append( lambda s,r: record_validator(db.mod_cmp,r,s.select()[0]))
+db.mod._after_update.append( lambda s,r: mod_after_update(r,s))
+
+def mod_tipos_after_update(r,s):
+    if s:
+        for reg in s.select(db.mod.ALL,left=db.mod.on(db.mod.tipo==db.mod_tipos.id)):
+            des=monta_descripcion_modulo(db,reg)
+            db(db.mod.id==reg['id']).update_naive(name=des)
+            agrega_refresco(db.mod.name,reg['id'],des)
+    return
+db.mod_tipos._after_update.append( lambda s,r: mod_tipos_after_update(r,s))
+
+def mod_atr_after_update(r,s):
+    if s:
+        for reg in s(db.mod_mod_atr.atr==db.mod_atr.id)(db.mod_mod_atr.mod==db.mod.id).select(db.mod.ALL):
+            des=monta_descripcion_modulo(db,reg)
+            db(db.mod.id==reg['id']).update_naive(name=des)
+            agrega_refresco(db.mod.name,reg['id'],des)
+    return
+db.mod_atr._after_update.append( lambda s,r: mod_atr_after_update(r,s))
+
+
+#Modulos Piezas Vista
+"""
+SELECT   'P' as tipo, cod_pie as codigo,dbo.finpieza.DESCRI as name from dbo.finpieza
+union select  'M' as tipo,'' as codigo, dbo.mod.name from dbo.mod
+"""
+db.define_table('mod_mod_pie',
+                Field('tipo','string',length=1),
+                Field('codigo','string',length=15),
+                Field('name','string',label='Descripción',length=60),migrate=False)
+
+########################## COMPONENTES DE MODULO
+db.define_table('mod_cmp',
+   Field('mod',db.mod,label=T('Módulo'),requires=IS_IN_DB(db,db.mod,'%(name)s',orderby='name')),
+   Field('cmp_tipo','string',length=1,label='Pza/Mod',requires=IS_IN_SET({'P':'Pieza','M':'Modulo'},zero=None)),
+   Field('cmp_pie','integer',label='Pieza comp.',requires=IS_NULL_OR(IS_IN_DB(db,db.productos,'%(name)s',orderby='name'))),
+   Field('cmp_mod','integer',label='Módulo comp.', requires=IS_NULL_OR(IS_IN_DB(db,db.mod,'%(name)s',orderby='name'))),
+   Field('formula',default='1',requires=IS_FORMULA(db,db.mod_atr.clave),represent=lambda v,r: IS_FORMULA.formatea(db,v,db.mod_atr.clave)),
+   singular='Componente',plural='Componentes',
+   )
+db.mod_cmp.cmp_pie.widget=AutocompleteWidgetSelectOrAddOption(request, db.productos.name,keyword='cmppie', id_field=db.productos.id,min_length=1)
+db.mod_cmp.cmp_mod.widget=AutocompleteWidgetSelectOrAddOption(request, db.mod.name,keyword='cmpmod',  id_field=db.mod.id, min_length=1,controller='default',function='view_mod_tabs')
+db.mod_cmp.formula.widget=AutocompleteWidgetSelectOrAddOption(request, db.mod_atr.clave,keyword='modcmp', form_title='',min_length=1,multi=True,add_option=False, orderby='clave')
+db.mod_cmp.cmp_tipo.represent=lambda val,row: MOD_CMP_TIPO().getitems()[val]
+db.mod_cmp.cmp_pie.show_if=(db.mod_cmp.cmp_tipo==MOD_CMP_TIPO.pieza)
+db.mod_cmp.cmp_mod.show_if=(db.mod_cmp.cmp_tipo==MOD_CMP_TIPO.modulo)
+
+def mod_cmp_after_update(r,s):
+    if s:
+        if r['cmp_tipo']==MOD_CMP_TIPO.pieza and r['cmp_mod']!=None:
+            s.update_naive(cmp_mod=None)
+        elif r['cmp_tipo']==MOD_CMP_TIPO.modulo and r['cmp_pie']!= None:
+            s.update_naive(cmp_pie=None)
+    return
+#db.mod_cmp._before_insert.append( lambda r: record_validator(db.mod_cmp,r))
+#db.mod_cmp._before_update.append( lambda s,r: record_validator(db.mod_cmp,r,s.select()[0]))
+db.mod_cmp._after_update.append( lambda s,r: mod_cmp_after_update(r,s))
+
+###################################### ATRIBUTOS DE MODULO / PLANTILLA / CONFIGURACION
+
+
+#funcion que define una tabla y sus requires y atributos para ser atributos hijos de una tabla
+def define_atributos_atr(tablename,padre,campopadre):
+    db.define_table(tablename,
+    Field(campopadre,db[padre],label=T(db[padre]._singular)),
+    Field('atr',db.mod_atr,label=T('Atributo'),requires=IS_IN_DB(db,db.mod_atr,'%(name)s',orderby='name',zero='Elija un valor')),
+    Field('valores','list:reference db.mod_val',label='Rango valores',represent=lambda v,j: (', '.join([db.mod_val(i).name if db.mod_val(i) else '%s!'% i for i in v])) if v else ''),
+    Field('rango','string',label='Rango fórmula',comment=db.mod_atr.rango.comment),
+    Field('val_def', 'integer', label='Valor predet.'),
+    Field('val_def_formula', 'string',length=100, label='Fórmula predet.'),
+    #Field('val_def_disp',label='Valor predet.'),
+    #Field('rango_disp','string',label='Rango disp.'),
+    Field('tipo','string',length=1),
+    Field('lock','boolean',label='Manual',default=True),
+    singular='Atributo de %s' %db[padre]._singular,plural='Atributos de %s' % db[padre]._singular)
+    #actualizaciones antes y despues
+    tabla=db[tablename]
+    tabla.valores.requires=IS_EMPTY_OR(IS_IN_DB(db(db.mod_val.atr>0), db.mod_val.id,'%(name)s',multiple=True,zero='-/-',orderby='mod_val.name'))
+
+    tabla.rango.show_if=(tabla.tipo!=MOD_ATR_TIPO.valores )
+    tabla.rango.requires = IS_EMPTY_OR(IS_RANGE(db, db.mod_atr.clave))
+    tabla.val_def_formula.show_if=(tabla.tipo!=MOD_ATR_TIPO.valores)
+    tabla.val_def.show_if=(tabla.tipo==MOD_ATR_TIPO.valores)
+    tabla.valores.show_if=(tabla.tipo==MOD_ATR_TIPO.valores)
+    tabla.val_def.requires=IS_EMPTY_OR(IS_IN_DB(db(db.mod_val.atr>0), db.mod_val.id,'%(name)s',orderby='mod_val.name'))
+    tabla.rango_disp=Field.Virtual(lambda r:  tabla.valores.represent(r[tablename+'.valores'],r) if r[tablename+'.tipo']==MOD_ATR_TIPO.valores  else IS_FORMULA.formatea(db,r[tablename+'.rango'],db.mod_atr.clave),label='Rango')
+    tabla.rango_disp.listable=True
+    tabla.val_def_formula.requires=IS_EMPTY_OR(IS_FORMULA(db,db.mod_atr.clave))
+    tabla.val_def_formula.represent=lambda v,r: IS_FORMULA.formatea(db,v,db.mod_atr.clave)
+    tabla.val_def_formula.widget=AutocompleteWidgetSelectOrAddOption(request, db.mod_atr.clave,keyword=tablename, form_title='', min_length=1, multi=True,add_option=False, orderby='clave')
+    tabla.val_def_disp=Field.Virtual(lambda r: tabla.val_def_formula.represent(r[tablename+'.val_def_formula'],r) if r[tablename+'.tipo']!=MOD_ATR_TIPO.valores else (db.mod_val(r[tablename+'.val_def']).name if  r[tablename+'.val_def'] else ''),label='Valor def.')
+    tabla.val_def_disp.listable=True
+    
+    #tabla.tipo.default=MOD_ATR_TIPO.valores
+    select_atr_id='%s_atr' % tabla._tablename
+    tabla.atr.widget=SelectOrAddOption( db.mod_atr, select_id=select_atr_id,controller='default',function='view_mod_atr_tabs')
+    mod_atr_id=0
+    if tabla._tablename in request.args:
+        if 'new' in request.args:
+            if 'atr' in request.post_vars:
+                mod_atr_id=request.post_vars.atr
+        else:
+            reg=tabla(request.args[-1])
+            if reg:
+                 mod_atr_id=reg.atr
+    ######################################## COMPUTE LAZY copia tipo de atributo en el atributo hijo
+    r=db.mod_atr[mod_atr_id]
+    if r:
+        tabla.rango.default = r.rango
+
+    tabla.tipo.widget = Compute_lazy(
+        lambda value, trigger, reg: (db.mod_atr(reg['atr']).tipo or '') if reg['atr'] else '',
+        triggers=[tabla.atr], user_signature=True, visible=False)
+
+    tabla.rango.widget = Compute_lazy(
+        lambda value, trigger, reg: db.mod_atr.rango.represent(db.mod_atr(reg['atr']).rango,None) if reg['atr'] else '',
+        triggers=[tabla.atr], user_signature=True, visible=False)
+
+    tabla.val_def_formula.widget = Compute_lazy(
+        lambda value, trigger, reg: db.mod_atr.val_def_formula.represent(db.mod_atr(reg['atr']).val_def_formula,None) if reg['atr'] else '',
+        triggers=[tabla.atr], user_signature=True, visible=False)
+
+    tabla.val_def.widget = lazy_options_widget(
+                      select_atr_id,
+                      lambda v: (db.mod_val.atr == v),
+                      mod_atr_id,
+                      user_signature=True,
+                      field=tabla.val_def,multiple=False,
+                        lazy_default=lambda v: (db.mod_atr(v).val_def if v else None)
+                      )
+
+    tabla.valores.widget = lazy_options_widget(
+                      select_atr_id,
+                      lambda v: (db.mod_val.atr == v),
+                      mod_atr_id, #VARIABLE TRIGGERM, HA DE COINCIDIR SU NOMBRE CON LA VARIABLE DEL FORMULARIO  mod_mod_mod.atr -> request.vars.atr
+                      orderby=db.mod_val.name,
+                      user_signature=True,
+                      # If you want to process ajax requests at the time of the object construction (not at the form rendered),
+                      # specify your target field in the following:
+                      field=tabla.valores,multiple=True,
+                     lazy_default=lambda v: (db.mod_atr[v].val_def if v else None)
+                      )
+    #def atr_after_update(r,s):
+        #if s:
+            #sœ.update_naive(tipo=db.mod_atr(r['atr']).tipo)
+    #tabla._before_insert.append( lambda r: record_validator(tabla,r))
+    #tabla._before_update.append( lambda s,r: record_validator(tabla,r,s.select()[0]))
+    #tabla._after_update.append( lambda s,r: atr_after_update(r,s))
+    #tabla._after_delete.append( lambda s: atr_after_update(None,s))
+    
+define_atributos_atr ('mod_mod_atr','mod','mod')
+
+def mod_mod_atr_after_update(r,s=None):
+    def update(reg):
+        des=monta_descripcion_modulo(db,reg['mod'])
+        db(db.mod.id==reg['mod']).update_naive(name=des)
+        agrega_refresco(db.mod.name,reg['mod'],des)
+    if s:
+        for reg in s.select():
+            update(reg)
+    else:
+          update(r)
+    return
+
+db.mod_mod_atr._after_insert.append( lambda r,id: mod_mod_atr_after_update(r))
+db.mod_mod_atr._after_delete.append( lambda s,r: mod_mod_atr_after_update(r,s))
+db.mod_mod_atr._after_update.append( lambda s,r: mod_mod_atr_after_update(r,s))
+####################### PLANTILLAS CONFIGURACIONES
+db.define_table('mod_cfl',
+   Field('name',label='Descripción',length=100,requires=[IS_NOT_EMPTY(),IS_NOT_IN_DB(db,'mod_cfl.name')]),
+   format='%(name)s' ,singular='Plantilla de Configuración', plural='Plantillas de Configuración')
+
+
+########################## COMPONENTES DE PLANTILLAS DE CONFIGURACION
+db.define_table('mod_cfl_tip',
+   Field('cfl',db.mod_cfl,label=T('Plantilla'),requires=IS_IN_DB(db,db.mod_cfl,'%(name)s',orderby='name')),
+   Field('mod_tipo',db.mod_tipos,label='Tipo de Módulo', requires=IS_IN_DB(db,db.mod_tipos,'%(name)s',orderby='name')),
+   Field('min_mods','integer',label="Mínimo de módulos necesarios"),
+   Field('formula',default='1',label=T('Fórmula'),requires=IS_FORMULA(db,db.mod_atr.clave),represent=lambda v,r: IS_FORMULA.formatea(db,v,db.mod_atr.clave)),
+   singular='Tipo de Módulo de Plantilla',plural='Tipos de Módulo de Plantilla'
+   )
+db.mod_cfl_tip.mod_tipo.widget=SelectTreeWidget(request,mptt,db.mod_tipos.name, id_field=db.mod_tipos.id,db=db, keyword="modcfltip")
+db.mod_cfl_tip.formula.widget=AutocompleteWidgetSelectOrAddOption(request, db.mod_atr.clave,keyword='modcflfor', form_title='',min_length=1,multi=True,add_option=False, orderby='clave')
+
+####################### ATRIBUTOS  DE PLANTILLAS DE CONFIGURACION
+define_atributos_atr ('mod_cfl_atr','mod_cfl','cfl')
+
+####################### CONFIGURACIONES
+db.define_table('mod_cfg',
+   Field('name',label='Descripción',length=100,requires=[IS_NOT_EMPTY(),IS_NOT_IN_DB(db,'mod_cfg.name')]),
+   Field('cfl_base','reference mod_cfl',label='Plantilla Configuración'),
+                #Field('tipo',db.mod_tipos,label='Tipo',requires=IS_IN_DB(db(db.mod_tipos.parent>0),db.mod_tipos,'%(name)s',orderby='name')),
+   format='%(name)s' ,singular='Configuración', plural='Configuraciones')
+ #db.mod.tipo.represent=lambda v,r: db.mod_tipos(v).name if v else ''
+if 'new' in request.args:
+    db.mod_cfg.cfl_base.comment = 'Se creará un esquema de configuración como datos de partida. No se podrá cambiar después.'
+else:
+    db.mod_cfg.cfl_base.writable=False
+
+########################## COMPONENTES DE CONFIGURACION
+db.define_table('mod_cfg_mod',
+   Field('cfg',db.mod_cfg,label=T('Configuración'),requires=IS_IN_DB(db,db.mod_cfg,'%(name)s',orderby='name')),
+   Field('tipo', db.mod_tipos, label='Tipo módulo',requires=IS_IN_DB(db, db.mod_tipos, '%(name)s', orderby='name')),
+   Field('mod',db.mod,label='Módulo', requires=IS_IN_DB(db,db.mod,'%(name)s',orderby='name')),
+   Field('formula',default='1',label=T('Fórmula'),requires=IS_FORMULA(db,db.mod_atr.clave),represent=lambda v,r: IS_FORMULA.formatea(db,v,db.mod_atr.clave)),
+   singular='Componente',plural='Componentes'
+   )
+#db.mod_cfg_mod.mod.widget=AutocompleteWidgetSelectOrAddOption(request, db.mod.name,keyword='modcfgmod',  id_field=db.mod.id,min_length=-1,controller='default',function='view_mod_tabs')
+db.mod_cfg_mod.mod.widget=SelectTreeWidget(request,mptt,db.mod.name, id_field=db.mod.id,db=db, keyword="modcfgmod",field_reference_tree=db.mod.tipo)
+db.mod_cfg_mod.formula.widget=AutocompleteWidgetSelectOrAddOption(request, db.mod_atr.clave,keyword='modcfgmod', form_title='',min_length=1,multi=True,add_option=False, orderby='clave')
+db.mod_cfg_mod.tipo.represent=lambda v,r: db.mod_tipos(v).name if v else ''
+
+def mod_cfg_mod_after_update(r,s):
+    if s:
+        recolectar_atributos_modulo(r['cfg'],db.mod_cfg_mod,db.mod_cfg_atr,field_id_padre='cfg',field_id_cmp='mod')
+    return
+#db.mod_cfg_mod._before_insert.append( lambda r: record_validator(db.mod_cfg_mod,r))
+#db.mod_cfg_mod._before_update.append( lambda s,r: record_validator(db.mod_cfg_mod,r,s.select()[0]))
+#db.mod_cfg_mod._after_update.append( lambda s,r: mod_cfg_mod_after_update(r,s))
+
+####################### ATRIBUTOS  DE PLANTILLAS DE CONFIGURACION
+define_atributos_atr ('mod_cfg_atr','mod_cfg','cfg')
+
+"""
+def mod_cfg_after_insert(r,id):
+    if r['cfg_base']:
+        tb=db.mod_cfg_mod
+        for row in db(tb.cfg==r['cfg_base']).select(tb.mod,tb.formula):
+            tb.insert(cfg=id,**row)
+        tb = db.mod_cfg_atr
+        campos=[tb.atr,tb.valores,tb.rango,tb.val_def,tb.val_def_formula,tb.tipo,tb.lock]
+        for row in db(tb.cfg == r['cfg_base']).select(*campos):
+            d={}
+            for c in campos:
+                d[c.name]=row[c.name]
+            tb.insert(cfg=id,**d)
+db.mod_cfg._after_insert.append( lambda r,id: mod_cfg_after_insert(r,id))
+"""
+####################### PRESUPUESTO
+db.define_table('mod_pre',
+                Field('id','id',rname='cod_pre'),
+                Field('name','string',rname='descri',length=50),
+                Field('fecha','date'),
+                Field('numero','integer',rname='NPresupuesto'),
+                Field('cfg',db.mod_cfg,label="Configuración base"),
+                migrate=True,singular='Presupuesto',plural='Presupuestos',rname='Presupuestos')
+####################### PIEZAS PRESUPUESTO
+db.define_table('pre_pie',
+                Field('pre',db.mod_pre,rname='cod_pre'),
+                Field('pieza','integer',rname='id_pieza',length=50),
+                Field('cantidad','float',rname='uni_pie'),
+                migrate=False,singular='Pieza Presupuesto',plural='Piezas Presupuesto',rname='Piezas_Presupuesto')
+
+####################### MÓDULOS PRESUPUESTO
+db.define_table('mod_pre_mod',
+                Field('pre',db.mod_pre),
+                Field('mod',db.mod),
+                Field('cantidad','integer'),
+                singular='Mod Presupuesto',plural='Mods Presupuesto')
+
+db.define_table('mod_pre_atr',
+                Field('pre', db.mod_pre, writable=False),
+                Field('atr',  db.mod_atr,label='Atributo'),
+                Field('valor','string',length=100),
+                singular='Atributo Presupuesto', plural='Atributos Presupuesto')
+
+db.mod_pre_atr.valor_disp = Field.Virtual(lambda r: db.mod_val(r.mod_pre_atr.valor).name if db.mod_atr(r.mod_pre_atr.atr).tipo==MOD_ATR_TIPO.valores else \
+                                                '%s %s' % (r.mod_pre_atr.valor,db.mod_atr(r.mod_pre_atr.atr).um.cod_SI),
+                                          label='Valor')
+
+#
+""" Ejemplos de hacer actalizaciones desdpues de insertar o actualizar
+#el parametro s es una set de los registros a actualizar
+@el parametro f son los cmapos
+def set_id_after_insert(fields,id):
+    fields.update(fullpath=asigna_ruta_mod_tipos(fields,id))
+
+def set_id_after_update(s,f):
+    row = s.select().first()
+    s.update_naive(fullpath=asigna_ruta_mod_tipos(row,row.id))
+db.mod_tipos._after_insert.append(lambda f,id: set_id_after_insert(f,id))
+db.mod_tipos._after_update.append(lambda s,f: set_id_after_update(s,f))
+"""
+
+# En aquellas tablas de mssql que no tengan UTF8 hay que hacer esto para que codifique en el codec de la bd
+def MSACCESS_adapt(s,f):
+     for it in f.items():
+        if type(it[1])==str:
+              f[it[0]]=it[1].decode('utf8').encode(db._db_codec)
+        elif type(it[1])==datetime.datetime:
+              f[it[0]]=it[1].strftime('%Y-%m-%d %H:%M:%S')
+
+for i in [db.mod_tipos,db.mod,db.mod_atr,db.mod_cfg,db.mod_val,db.productos, db.mod_pre]:
+    i._before_update.append(MSACCESS_adapt)
+
+if auth.user:
+    GRAL.currency_simbol='€'
+    T.force(auth.user.language_code or T.accepted_language or 'es')
+else:
+    T.force(T.accepted_language or 'es')
